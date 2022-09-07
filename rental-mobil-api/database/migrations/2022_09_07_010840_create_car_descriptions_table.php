@@ -13,15 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('car_descriptions', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->integer('mobile_phone')->unique();
-            $table->string('address');
-            $table->string('password');
-            $table->rememberToken();
+            $table->unsignedBigInteger('car_id');
+            $table->integer('car_model_year');
+            $table->string('color');
+            $table->string('capacity');
+            $table->string('no_plate');
             $table->timestamps();
+
+            $table->foreign('car_id')->references('id')->on('cars');
         });
     }
 
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('car_descriptions');
     }
 };
