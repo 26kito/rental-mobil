@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('owner_id');
             $table->timestamps();
             
-            $table->foreign('owner_id')->references('id')->on('car_owners');
+            $table->foreign('owner_id')->references('id')->on('users');
         });
     }
 
