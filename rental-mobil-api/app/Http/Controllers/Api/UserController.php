@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Exception;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -133,20 +134,29 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $user = User::findOrFail($id);
-        $validated = $request->validate([
-            'name' => 'max:20',
-            // 'email' => 'email|unique:users',
-            // 'mobile_phone' => 'min:11|max:15|regex:/^([0-9\s\-\+\(\)]*)$/|unique:users',
-            // 'password' => 'min:8'
-        ]);
+        $user = User::findOrFail($request->id);
+
         try {
-            if ( $validated ) {
-                return $user;
-            } else {
-                return 'not ok';
+            if ( $user ) {
+                $validated = $request->validate([
+                    'name' => 'max:20',
+                    'email' => 'email|min:10',
+                    Rule::unique('users')->ignore($user->email, 'email'),
+                    'mobile_phone' => 'min:11|max:15|regex:/^([0-9\s\-\+\(\)]*)$/',
+                    Rule::unique('users')->ignore($user->mobile_phone),
+                ]);
+
+                $data = $request->all();
+
+                if ( $validated ) {
+                    $user->update($data);
+                    return response()->json([
+                        'message' => 'User updated successfully!',
+                        'data' => $user
+                    ], 200);
+                }
             }
         } catch (Exception $e) {
             throw $e;
@@ -161,6 +171,14 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+            return response()->json([
+                'message' => 'User deleted successfully'
+            ], 200);
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 }
