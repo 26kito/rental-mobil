@@ -57,7 +57,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|max:20',
+            'name' => 'required|min:4|max:20|alpha',
             'email' => 'required|email|unique:users',
             'mobile_phone' => 'required|min:11|max:15|regex:/^([0-9\s\-\+\(\)]*)$/|unique:users',
             'role_id' => 'required|exists:roles,id',
@@ -90,7 +90,39 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Function for user login
+     */
+    public function login(Request $request)
+    {
+        $data = $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required'
+        ]);
+
+        try {
+            $user = User::where('email', $request->email)->first();
+            if ( Auth::attempt($data) && Hash::check($request->password, $user->password) ) {
+                $accessToken = $user->createToken('authToken')->accessToken;
+                return response()->json([
+                    'message' => 'Success',
+                    'data' => $user,
+                    'access_token' => $accessToken
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'Wrong Password!'
+                ], 422);
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ]);
+        }
+        
+    }
+
+    /**
+     * Show specified user by id.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -128,15 +160,15 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Function for update specified user.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
-        $user = User::findOrFail($request->id);
+        $user = User::findOrFail($id);
 
         try {
             if ( $user ) {
@@ -164,7 +196,7 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Function for delete specified user.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response

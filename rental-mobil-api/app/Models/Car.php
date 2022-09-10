@@ -12,4 +12,8 @@ class Car extends Model
     protected $fillable = [
         'brand_car', 'status', 'owner_id'
     ];
+
+    public function carDescription() {
+        return $this->hasOne(CarDescription::class);
+    }
 }

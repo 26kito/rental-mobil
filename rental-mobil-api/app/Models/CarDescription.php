@@ -12,4 +12,8 @@ class CarDescription extends Model
     protected $fillable = [
         'car_id', 'car_model_year', 'color', 'capacity', 'no_plate'
     ];
+
+    public function car() {
+        return $this->belongsTo(Car::class);
+    }
 }

@@ -15,11 +15,11 @@ return new class extends Migration
     {
         Schema::create('car_descriptions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('car_id');
+            $table->unsignedBigInteger('car_id')->unique();
             $table->integer('car_model_year');
             $table->string('color');
-            $table->string('capacity');
-            $table->string('no_plate');
+            $table->integer('capacity');
+            $table->string('no_plate')->unique();
             $table->timestamps();
 
             $table->foreign('car_id')->references('id')->on('cars');

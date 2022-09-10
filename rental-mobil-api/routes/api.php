@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,8 +24,17 @@ Route::prefix('v1')->group(function() {
     Route::prefix('user')->group(function() {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/create', [UserController::class, 'store']);
+        Route::post('/login', [UserController::class, 'login']);
         Route::get('/{id}', [UserController::class, 'show']);
         Route::put('/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
+    });
+
+    Route::prefix('car')->group(function() {
+        Route::get('/', [CarController::class, 'index']);
+        Route::post('/create', [CarController::class, 'store'])->middleware('auth:api');
+        Route::get('/{id}', [CarController::class, 'show']);
+        Route::put('/{id}', [CarController::class, 'update'])->middleware('auth:api');
+        Route::delete('/{id}', [CarController::class, 'destroy'])->middleware('auth:api');
     });
 });
