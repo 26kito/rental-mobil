@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CarController;
+use App\Http\Controllers\Api\RentController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,5 +37,9 @@ Route::prefix('v1')->group(function() {
         Route::get('/{id}', [CarController::class, 'show']);
         Route::put('/{id}', [CarController::class, 'update'])->middleware('auth:api');
         Route::delete('/{id}', [CarController::class, 'destroy'])->middleware('auth:api');
+    });
+
+    Route::prefix('rent')->group(function() {
+        Route::post('/{car_id}', [RentController::class, 'store'])->middleware('auth:api');
     });
 });

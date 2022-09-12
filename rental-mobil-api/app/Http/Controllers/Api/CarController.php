@@ -224,23 +224,16 @@ class CarController extends Controller
     public function destroy($id)
     {
         if ( Auth::user()->role_id === 2 ) {
-            try {
-                $data = Car::with('carDescription')->where('owner_id', Auth::id())->find($id);
-                if ( $data ) {
-                    try {
-                        DB::beginTransaction();
-
-                        
-                    } catch (\Throwable $th) {
-                        //throw $th;
-                    }
-                } else {
-                    return response()->json([
-                        'message' => 'gaada',
-                    ], 200);
-                }
-            } catch (Exception $e) {
-                return response()->json(['message' => $e->getMessage()]);
+            $data = Car::with('carDescription')->where('owner_id', Auth::id())->find($id);
+            if ( $data ) {
+                $data->delete();
+                return response()->json([
+                    'message' => 'Data deleted successfully!'
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'No data found'
+                ], 200);
             }
         }
     }

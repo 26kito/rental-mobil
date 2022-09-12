@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('customer_id');
             $table->unsignedBigInteger('car_id');
-            $table->dateTime('rent_date');
-            $table->dateTime('return_date');
+            $table->date('rent_date');
+            $table->date('return_date');
             $table->timestamps();
 
             $table->foreign('customer_id')->references('id')->on('users');

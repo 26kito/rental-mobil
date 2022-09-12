@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('no_plate')->unique();
             $table->timestamps();
 
-            $table->foreign('car_id')->references('id')->on('cars');
+            $table->foreign('car_id')->references('id')->on('cars')->onDelete('cascade');
         });
     }
 
