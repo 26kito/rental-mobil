@@ -21,8 +21,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
   return $request->user();
 });
 
+Route::get('/hello', function () {
+  return "Hello";
+});
+
 Route::prefix('v1')->group(function () {
   Route::prefix('user')->group(function () {
+
     // Btw ini perlu g yah ?
     Route::get('/', [UserController::class, 'index']);
 
@@ -32,9 +37,6 @@ Route::prefix('v1')->group(function () {
     // routes user convensional pada umum nya 
     Route::post('/register', [UserController::class, 'register']);
     Route::post('/login', [UserController::class, 'login']);
-
-    // Mungkin butuh klo ada admin nya
-    // Route::get('/{id}', [UserController::class, 'show']);
 
     // Kalo pake id nanti gampang ke tebak, bisa aja gua iseng gitu kan awowkwk
     Route::put('/edit/{user:email}', [UserController::class, 'update']);
