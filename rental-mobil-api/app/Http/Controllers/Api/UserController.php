@@ -13,9 +13,17 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *     path="/api/v1/user",
+     *     tags={"user"},
+     *     summary="Retrieve all user data",
+     *     description="Retrieve all user data",
+     *     operationId="index",
+     *     @OA\Response(
+     *         response=200,
+     *         description="success",
+     *     )
+     * )
      */
     public function index()
     {
@@ -39,22 +47,22 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @OA\Post(
+     *     path="/store/order",
+     *     tags={"user"},
+     *     summary="Register for user",
+     *     operationId="register",
+     *     @OA\Response(
+     *         response=200,
+     *         description="success",
+     *     ),
+     *     @OA\RequestBody(
+     *         description="order placed for purchasing th pet",
+     *         required=true,
+     *     )
+     * )
      */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function register(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|min:4|max:20|alpha',
@@ -76,11 +84,9 @@ class UserController extends Controller
                 ]);
             }
     
-            $accessToken = $user->createToken('authToken')->accessToken;
             return response()->json([
                 'message' => 'User Created Successfully!',
                 'user' => $user,
-                'access_token' => $accessToken
             ], 201);
         } catch (Exception $e) {
             return response()->json([
@@ -91,6 +97,8 @@ class UserController extends Controller
 
     /**
      * Function for user login
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
     public function login(Request $request)
     {
@@ -191,7 +199,9 @@ class UserController extends Controller
                 }
             }
         } catch (Exception $e) {
-            throw $e;
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
         }
     }
 
@@ -210,7 +220,9 @@ class UserController extends Controller
                 'message' => 'User deleted successfully'
             ], 200);
         } catch (Exception $e) {
-            throw $e;
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
         }
     }
 }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use Exception;
 use App\Models\Car;
-use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\CarDescription;
 use Illuminate\Validation\Rule;
@@ -21,7 +20,7 @@ class CarController extends Controller
      */
     public function index()
     {
-        $data = Car::get();
+        $data = Car::with('carDescription')->get();
         try {
             if ( $data->isNotEmpty() ) {
                 return response()->json([
@@ -33,8 +32,10 @@ class CarController extends Controller
                     'message' => 'There\'s no data found'
                 ], 200);
             }
-        } catch (\Throwable $th) {
-            throw $th;
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
         }
     }
 
@@ -56,17 +57,15 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
-        $user = Auth::user();
         try {
             // Check if user is an car_owner
-            if ( $user->role_id === 2 ) {
+            if ( Auth::user()->role_id === 2 ) {
                 $firstValidated = $request->validate([
                     'brand_car' => 'required',
                 ]);
                 
                 if ( $firstValidated ) {
                     DB::beginTransaction();
-
                     try {
                         $insert = Car::create([
                             'brand_car' => $request->brand_car,
@@ -78,7 +77,7 @@ class CarController extends Controller
                                 'car_model_year' => 'required|integer',
                                 'color' => 'alpha',
                                 'capacity' => 'integer',
-                                'no_plate' => 'unique:car_descriptions'
+                                'no_plate' => 'unique:car_descriptions|min:5'
                             ]);
                             if ( $secondValidated ) {
                                 CarDescription::create([
@@ -86,11 +85,11 @@ class CarController extends Controller
                                     'car_model_year' => $request->car_model_year,
                                     'color' => $request->color,
                                     'capacity' => $request->capacity,
-                                    'no_plate' => $request->no_plate,
+                                    'no_plate' => strtoupper($request->no_plate),
                                 ]);
 
                                 DB::commit();
-                                $data = Car::with('carDescription')->first();
+                                $data = Car::with('carDescription')->whereRelation('carDescription', 'car_id', $insert->id)->get();
                                 return response()->json([
                                     'message' => 'Data created successfully!',
                                     'data' => $data
@@ -98,20 +97,16 @@ class CarController extends Controller
                             }
                         } else {
                             DB::rollback();
-                            return response()->json([
-                                'message' => 'Gagal'
-                            ], 200);
+                            return response()->json(['message' => 'Gagal'], 200);
                         }
                     } catch (Exception $e) {
                         DB::rollback();
-                        return response()->json([
-                            'message' => $e->getMessage()
-                        ], 200);
+                        return response()->json(['message' => $e->getMessage()], 400);
                     }
                 }
             // If user is not an car owner, 
             } else {
-                return response()->json(['message' => 'pulang lu anj'], 403);
+                return response()->json(['message' => 'Not authorized'], 403);
             }
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()]);
@@ -124,9 +119,9 @@ class CarController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($carId)
     {
-        $data = Car::with('carDescription')->find($id);
+        $data = Car::with('carDescription')->find($carId);
         if ( $data != null ) {
             return response()->json([
                 'message' => 'Success',
@@ -134,7 +129,7 @@ class CarController extends Controller
             ], 200);
         } else {
             return response()->json([
-                'message' => 'Gada'
+                'message' => 'No data found!'
             ], 200);
         }
     }
@@ -157,9 +152,9 @@ class CarController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $carId)
     {
-        $car = Car::with('carDescription')->find($id);
+        $car = Car::with('carDescription')->find($carId);
         if ( $car ) {
             try {
                 if ( Auth::user()->role_id == 2 ) {
@@ -177,7 +172,7 @@ class CarController extends Controller
                                 Rule::unique('car_descriptions')->ignore($request->no_plate)
                             ]);
                             if ( $secondValidated ) {
-                                CarDescription::where('car_id', $id)
+                                CarDescription::where('car_id', $carId)
                                                 ->update([
                                     'car_model_year' => $request->car_model_year,
                                     'color' => $request->color,
@@ -221,19 +216,25 @@ class CarController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($carId)
     {
         if ( Auth::user()->role_id === 2 ) {
-            $data = Car::with('carDescription')->where('owner_id', Auth::id())->find($id);
-            if ( $data ) {
-                $data->delete();
+            try {
+                $data = Car::with('carDescription')->where('owner_id', Auth::id())->find($carId);
+                if ( $data ) {
+                    $data->delete();
+                    return response()->json([
+                        'message' => 'Data deleted successfully!'
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'message' => 'No data found!'
+                    ], 200);
+                }
+            } catch (Exception $e) {
                 return response()->json([
-                    'message' => 'Data deleted successfully!'
-                ], 200);
-            } else {
-                return response()->json([
-                    'message' => 'No data found'
-                ], 200);
+                    'message' => $e->getMessage()
+                ]);
             }
         }
     }
