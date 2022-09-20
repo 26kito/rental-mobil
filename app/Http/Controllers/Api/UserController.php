@@ -10,185 +10,129 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Passport\HasApiTokens;
 
 class UserController extends Controller
 {
-  use HasApiTokens;
-
-  public function checkDuplicate(Request $request)
+  public function profile($user_id)
   {
-    $emailDuplicate = User::where('email', $request->email)->get();
-    $mpDuplicate = User::where('mobile_phone', $request->mobile_phone)->get();
-
-    $message = "";
-
-    if (count($emailDuplicate)) $message .= "Email sudah ada ";
-    if (count($mpDuplicate)) $message .= "No Hp sudah ada";
-
-    return $message;
-  }
-  /**
-   * Display a listing of the resource.
-   *
-   * @return \Illuminate\Http\Response
-   */
-  public function index()
-  {
-    $user = User::get();
-    try {
-      if ($user->isNotEmpty()) {
-
-        return response()->json([
-          'message' => 'Success',
-          'data' => $user
-        ], 200);
-      }
-
+    $data = User::where('id', $user_id)->first();
+    if ( $data ) {
       return response()->json([
-        'message' => 'There\'s no data'
+        'message' => 'Success',
+        'data' => $data
       ], 200);
-    } catch (Exception $e) {
-
-      return response()->json([
-        'message' => $e->getMessage()
-      ], 400);
+    } else {
+      return response()->json(['message' => 'There\'s no data!']);
     }
   }
 
-  public function profile($name)
-  {
-    $user = User::with('role')->where('name', $name)->get();
-
-    return response()->json([
-      'message' => 'Profile user',
-      'data' => $user
-    ]);
-  }
-
-  /**
-   * Store a newly created resource in storage.
-   *
-   * @param  \Illuminate\Http\Request  $request
-   * @return \Illuminate\Http\Response
-   */
   public function register(Request $request)
   {
-    // $messageIfDuplicate = $this->checkDuplicate($request);
-    //
-    // if ($messageIfDuplicate) {
-    //   return response()->json([
-    //     'message' => $messageIfDuplicate
-    //   ], 403);
-    // }
-
-    $validation = Validator::make($request->all(), [
-      'email' => 'required|unique:users|email',
-      'mobile_phone' => 'required|unique:users|min:11|max:15'
+    $validated = Validator::make($request->all(), [
+      'name' => 'required|min:4|max:20|regex:/^[\pL\s\-]+$/u',
+      'email' => 'required|email|min:8|max:20|unique:users',
+      'address' => 'required',
+      'mobile_phone' => 'required|min:11|max:15|regex:/^([0-9\s\-\+\(\)]*)$/|unique:users',
+      'role_id' => 'required|exists:roles,id',
+      'password' => 'required|min:8|confirmed'
     ]);
 
-    if ($validation->fails()) {
-      return response()->json([
-        'message' => 'No HP dan Email sudah ada'
-      ]);
-    }
-
     try {
-      User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'mobile_phone' => $request->mobile_phone,
-        'address' => $request->address,
-        'role_id' => $request->role_id,
-        'password' => Hash::make($request->password)
-      ]);
+      // If validation success, then create data
+      if ($validated->passes()) {
+        User::create([
+          'name' => $request->name,
+          'email' => $request->email,
+          'mobile_phone' => $request->mobile_phone,
+          'address' => $request->address,
+          'role_id' => $request->role_id,
+          'password' => Hash::make($request->password)
+        ]);
 
-      return response()->json([
-        'message' => 'User berhasil dibuat, kamu bisa Login sekarang',
-      ], 201);
+        return response()->json([
+          'message' => 'Successfully created data',
+        ], 201);
+        // If validation error, throw message
+      } else {
+        return response()->json(['message' => $validated->errors()]);
+      }
     } catch (Exception $e) {
-
       return response()->json([
         'message' => $e->getMessage()
       ], 400);
     }
   }
 
-  /**
-   * Function for user login
-   */
   public function login(Request $request)
   {
+    $validated = Validator::make($request->all(), [
+      'email' => 'required|email|exists:users,email',
+      'password' => 'required|min:8'
+    ]);
+
     try {
-      $user = User::where('email', $request->email)->first();
-
-      if (Auth::attempt($request) && Hash::check($request->password, $user->password)) {
-
-        $accessToken = $user->createToken('authToken')->accessToken;
+      // If validation success, then create data
+      if ($validated->passes()) {
+        $user = User::where('email', $request->email)->first();
+        // If user email and password is match
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password]) && Hash::check($request->password, $user->password)) {
+          $accessToken = $user->createToken('authToken')->accessToken;
+          return response()->json([
+            'message' => 'Success',
+            'data' => $user,
+            'access_token' => $accessToken
+          ], 200);
+          // User email and password is no match
+        } else {
+          return response()->json([
+            'message' => "Email & password does not match"
+          ], 200);
+        }
+        // When the validation is error
+      } else {
         return response()->json([
-          'access_token' => $accessToken
+          'message' => $validated->errors()
         ], 200);
       }
-
-      return response()->json([
-        'message' => 'Email dan password tidak sesuai'
-      ], 422);
     } catch (Exception $e) {
-
       return response()->json([
         'message' => $e->getMessage()
       ]);
     }
   }
-  /**
-   * Function for update specified user.
-   *
-   * @param  \Illuminate\Http\Request  $request
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
-  public function update(Request $request, User $user)
+
+  public function update(Request $request, $id)
   {
-    try {
-      if ($user) {
-        $validated = $request->validate([
+    // Check if user id is same from the param and user id = id
+    $user = User::where('id', $id)->where('id', Auth::id())->first();
+    if ($user) {
+      try {
+        // Validate for the input
+        $validated = Validator::make($request->all(), [
           'name' => 'max:20',
           'email' => 'email|min:10',
-          Rule::unique('users')->ignore($user->email, 'email'),
+          Rule::unique('users')->ignore($user->email),
           'mobile_phone' => 'min:11|max:15|regex:/^([0-9\s\-\+\(\)]*)$/',
           Rule::unique('users')->ignore($user->mobile_phone),
         ]);
 
-        $data = $request->all();
-
-        if ($validated) {
-          $user->update($data);
+        // If validation passes, then update data
+        if ($validated->passes()) {
+          $user->update($request->all());
           return response()->json([
             'message' => 'User updated successfully!',
             'data' => $user
           ], 200);
+        } else {
+          return response()->json(['message' => $validated->errors()]);
         }
+      } catch (Exception $e) {
+        return response()->json(['message' => $e->getMessage()]);
       }
-    } catch (Exception $e) {
-      throw $e;
+      // If user is not same, can't update
+    } else {
+      return response()->json(['message' => 'There\'s no data!']);
     }
   }
 
-  /**
-   * Function for delete specified user.
-   *
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
-  public function destroy(User $user)
-  {
-    try {
-      $user->delete();
-      return response()->json([
-        'message' => 'User deleted successfully'
-      ], 200);
-    } catch (Exception $e) {
-      throw $e;
-    }
-  }
 }
