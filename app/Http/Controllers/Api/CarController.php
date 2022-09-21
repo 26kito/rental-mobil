@@ -4,26 +4,21 @@ namespace App\Http\Controllers\Api;
 
 use Exception;
 use App\Models\Car;
-use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\CarDescription;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class CarController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $data = Car::get();
+        $data = Car::with('carDescription')->get();
         try {
-            if ( $data->isNotEmpty() ) {
+            if ($data->isNotEmpty()) {
                 return response()->json([
                     'message' => 'Success',
                     'data' => $data
@@ -33,208 +28,152 @@ class CarController extends Controller
                     'message' => 'There\'s no data found'
                 ], 200);
             }
-        } catch (\Throwable $th) {
-            throw $th;
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        $user = Auth::user();
-        try {
-            // Check if user is an car_owner
-            if ( $user->role_id === 2 ) {
-                $firstValidated = $request->validate([
-                    'brand_car' => 'required',
-                ]);
-                
-                if ( $firstValidated ) {
-                    DB::beginTransaction();
-
-                    try {
-                        $insert = Car::create([
-                            'brand_car' => $request->brand_car,
-                            'owner_id' => Auth::id()
+        // Check if user is an car_owner
+        if (Auth::user()->role_id === 2) {
+            $firstValidated = Validator::make($request->all(), [
+                'brand_car' => 'required'
+            ]);
+            // If validation is passes, then proceed to next process
+            if ($firstValidated->passes()) {
+                DB::beginTransaction();
+                try {
+                    $insert = Car::create([
+                        'brand_car' => $request->brand_car,
+                        'owner_id' => Auth::id()
+                    ]);
+                    // If car created, then check the car description
+                    if ($insert) {
+                        $secondValidated = Validator::make($request->all(), [
+                            'car_id' => 'unique:car_descriptions',
+                            'car_model_year' => 'required|integer',
+                            'color' => 'alpha',
+                            'capacity' => 'integer|between:2,10',
+                            'no_plate' => 'unique:car_descriptions|min:5|max:12'
                         ]);
-                        if ( $insert ) {
-                            $secondValidated = $request->validate([
-                                'car_id' => 'unique:car_descriptions',
-                                'car_model_year' => 'required|integer',
-                                'color' => 'alpha',
-                                'capacity' => 'integer',
-                                'no_plate' => 'unique:car_descriptions'
+                        // If validation is passes, then proceed to next process
+                        if ($secondValidated->passes()) {
+                            CarDescription::create([
+                                'car_id' => $insert->id,
+                                'car_model_year' => $request->car_model_year,
+                                'color' => $request->color,
+                                'capacity' => $request->capacity,
+                                'no_plate' => strtoupper($request->no_plate),
                             ]);
-                            if ( $secondValidated ) {
-                                CarDescription::create([
-                                    'car_id' => $insert->id,
-                                    'car_model_year' => $request->car_model_year,
-                                    'color' => $request->color,
-                                    'capacity' => $request->capacity,
-                                    'no_plate' => $request->no_plate,
-                                ]);
 
-                                DB::commit();
-                                $data = Car::with('carDescription')->first();
-                                return response()->json([
-                                    'message' => 'Data created successfully!',
-                                    'data' => $data
-                                ], 201);
-                            }
-                        } else {
-                            DB::rollback();
+                            DB::commit();
+                            $data = Car::with('carDescription')->whereRelation('carDescription', 'car_id', $insert->id)->get();
                             return response()->json([
-                                'message' => 'Gagal'
-                            ], 200);
+                                'message' => 'Data created successfully!',
+                                'data' => $data
+                            ], 201);
+                            // If validation is failed, then throw error
+                        } else {
+                            return response()->json(['message' => $secondValidated->errors()]);
                         }
-                    } catch (Exception $e) {
+                        // If car is failed to create then throw error
+                    } else {
                         DB::rollback();
-                        return response()->json([
-                            'message' => $e->getMessage()
-                        ], 200);
+                        return response()->json(['message' => 'Gagal'], 200);
                     }
+                } catch (Exception $e) {
+                    DB::rollback();
+                    return response()->json(['message' => $e->getMessage()], 400);
                 }
-            // If user is not an car owner, 
+                // If validation is failed, then throw error
             } else {
-                return response()->json(['message' => 'pulang lu anj'], 403);
+                return response()->json(['message' => $firstValidated->errors()]);
             }
-        } catch (Exception $e) {
-            return response()->json(['message' => $e->getMessage()]);
+            // If user is not an car owner, 
+        } else {
+            return response()->json(['message' => 'Not authorized'], 403);
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function show($carId)
     {
-        $data = Car::with('carDescription')->find($id);
-        if ( $data != null ) {
+        $data = Car::with('carDescription')->find($carId);
+        if ($data != null) {
             return response()->json([
                 'message' => 'Success',
                 'data' => $data
             ], 200);
         } else {
             return response()->json([
-                'message' => 'Gada'
+                'message' => 'No data found!'
             ], 200);
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function update(Request $request, $carId)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $car = Car::with('carDescription')->find($id);
-        if ( $car ) {
-            try {
-                if ( Auth::user()->role_id == 2 ) {
-                    DB::beginTransaction();
-
-                    try {
-                        $car->update([
-                            'brand_car' => $request->brand_car
+        if (Auth::user()->role_id === 2) {
+            $car = Car::with('carDescription')->where('id', $carId)->where('owner_id', Auth::id())->find($carId);
+            // Check if there is data
+            if ($car) {
+                DB::beginTransaction();
+                $insert = $car->update([
+                    'brand_car' => $request->brand_car
+                ]);
+                if ($insert) {
+                    $validated = $request->validate([
+                        'car_model_year' => 'integer',
+                        'color' => 'alpha',
+                        'capacity' => 'integer|between:2,10',
+                        'no_plate' => 'min:5|max:12',
+                        Rule::unique('car_descriptions')->ignore($request->no_plate)
+                    ]);
+                    if ($validated) {
+                        CarDescription::where('car_id', $carId)->update([
+                            'car_model_year' => $request->car_model_year,
+                            'color' => $request->color,
+                            'capacity' => $request->capacity,
+                            'no_plate' => strtoupper($request->no_plate),
                         ]);
-                        if ( $car ) {
-                            $secondValidated = $request->validate([
-                                'car_model_year' => 'integer',
-                                'color' => 'alpha',
-                                'capacity' => 'integer',
-                                Rule::unique('car_descriptions')->ignore($request->no_plate)
-                            ]);
-                            if ( $secondValidated ) {
-                                CarDescription::where('car_id', $id)
-                                                ->update([
-                                    'car_model_year' => $request->car_model_year,
-                                    'color' => $request->color,
-                                    'capacity' => $request->capacity,
-                                    'no_plate' => $request->no_plate,
-                                ]);
 
-                                DB::commit();
-                                $data = Car::with('carDescription')->first();
-                                return response()->json([
-                                    'message' => 'Data updated successfully!',
-                                    'data' => $data
-                                ], 201);
-                            }
-                        } else {
-                            DB::rollback();
-                            return response()->json([
-                                'message' => 'Gagal'
-                            ], 200);
-                        }
-                    } catch (Exception $e) {
-                        DB::rollback();
+                        DB::commit();
+                        $data = Car::with('carDescription')->where('id', $carId)->where('owner_id', Auth::id())->first();
                         return response()->json([
-                            'message' => $e->getMessage()
-                        ], 200);
+                            'message' => 'Data updated successfully!',
+                            'data' => $data
+                        ], 201);
                     }
                 } else {
-                    return 'anak anj';
+                    DB::rollback();
+                    return response()->json(['message' => 'Gagal'], 200);
                 }
-            } catch (Exception $e) {
-                return $e->getMessage();
+            } else {
+                return response()->json(['message' => 'There\'s no data found!'], 404);
             }
         } else {
-            return 'gaada';
+            return response()->json(['message' => 'Not authorized!'], 401);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy($carId)
     {
-        if ( Auth::user()->role_id === 2 ) {
-            $data = Car::with('carDescription')->where('owner_id', Auth::id())->find($id);
-            if ( $data ) {
+        if (Auth::user()->role_id === 2) {
+            $data = Car::with('carDescription')->where('id', $carId)->where('owner_id', Auth::id())->find($carId);
+            if ($data) {
                 $data->delete();
                 return response()->json([
                     'message' => 'Data deleted successfully!'
                 ], 200);
             } else {
                 return response()->json([
-                    'message' => 'No data found'
-                ], 200);
+                    'message' => 'No data found!'
+                ], 404);
             }
+        } else {
+            return response()->json(['message' => 'Not authorized!'], 401);
         }
     }
 }
