@@ -16,18 +16,6 @@ class UserController extends Controller
 {
   use HasApiTokens;
 
-  public function checkDuplicate(Request $request)
-  {
-    $emailDuplicate = User::where('email', $request->email)->get();
-    $mpDuplicate = User::where('mobile_phone', $request->mobile_phone)->get();
-
-    $message = "";
-
-    if (count($emailDuplicate)) $message .= "Email sudah ada ";
-    if (count($mpDuplicate)) $message .= "No Hp sudah ada";
-
-    return $message;
-  }
   /**
    * Display a listing of the resource.
    *
@@ -74,14 +62,6 @@ class UserController extends Controller
    */
   public function register(Request $request)
   {
-    // $messageIfDuplicate = $this->checkDuplicate($request);
-    //
-    // if ($messageIfDuplicate) {
-    //   return response()->json([
-    //     'message' => $messageIfDuplicate
-    //   ], 403);
-    // }
-
     $validation = Validator::make($request->all(), [
       'email' => 'required|unique:users|email',
       'mobile_phone' => 'required|unique:users|min:11|max:15'
@@ -89,8 +69,8 @@ class UserController extends Controller
 
     if ($validation->fails()) {
       return response()->json([
-        'message' => 'No HP dan Email sudah ada'
-      ]);
+        'message' => $validation->messages()
+      ], 403);
     }
 
     try {
