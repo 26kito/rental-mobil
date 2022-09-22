@@ -20,9 +20,9 @@ Route::prefix('v1')->group(function() {
   Route::prefix('user')->group(function() {
     Route::get('/profile/{user_id}', [UserController::class, 'profile'])->middleware('auth:api');
     Route::post('/register', [UserController::class, 'register']);
-    Route::post('/login', [UserController::class, 'login']);
+    Route::post('/login', [UserController::class, 'login'])->name('login');
     Route::put('/edit/{user_id}', [UserController::class, 'update'])->middleware('auth:api');
-    Route::delete('/logout', [UserController::class, 'logout'])->middleware('auth:api');
+    Route::post('/logout', [UserController::class, 'logout'])->middleware('auth:api');
   });
 
   Route::prefix('car')->group(function() {

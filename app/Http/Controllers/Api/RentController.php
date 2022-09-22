@@ -9,37 +9,36 @@ use App\Models\Rent;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class RentController extends Controller
 {
     public function store(Request $request, $carId)
     {
         $car = Car::where('id', $carId)->first();
-        if ( Auth::user()->role_id === 1 && $car !== null ) {
+        if ( Auth::user()->role_id === 1 && $car !== null && Auth::user()->token()->user_id === Auth::id() ) {
             try {
-                $validated = $request->validate([
+                $validated = Validator::make($request->all(), [
                     'customer_id' => 'exists:users,id',
                     'car_id' => 'exists:cars,id',
                     'rent_date' => 'required|date_format:d-m-Y|after_or_equal:today',
                     'return_date' => 'required|date_format:d-m-Y|after_or_equal:rent_date'
                 ]);
-    
-                if ( $validated ) {
+                // If data validated, then move to next process
+                if ( $validated->passes() ) {
                     $data = Rent::create([
                         'customer_id' => Auth::id(),
                         'car_id' => $carId,
                         'rent_date' => Carbon::createFromFormat('d-m-Y', $request->rent_date),
                         'return_date' => Carbon::createFromFormat('d-m-Y', $request->return_date)
                     ]);
-    
                     return response()->json([
                         'message' => 'Success',
                         'data' => $data
                     ], 201);
+                // If data is not validated, then throw error
                 } else {
-                    return response()->json([
-                        'message' => 'Failed'
-                    ], 200);
+                    return response()->json(['message' => $validated->errors()], 200);
                 }
             } catch (Exception $e) {
                 return response()->json([

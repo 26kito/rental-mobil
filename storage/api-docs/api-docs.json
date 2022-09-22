@@ -1,0 +1,180 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Rental Mobil API",
+        "description": "Membuat API sederhana untuk rental mobil",
+        "contact": {
+            "email": "surya.aw26@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0",
+        "x-logo": {
+            "url": "https://via.placeholder.com/190x90.png?text=L5-Swagger"
+        }
+    },
+    "paths": {
+        "/api/v1/user/register": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Register user",
+                "description": "Register user",
+                "operationId": "register",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "type": "email"
+                                            },
+                                            "address": {
+                                                "type": "string"
+                                            },
+                                            "mobile_phone": {
+                                                "type": "integer"
+                                            },
+                                            "role_id": {
+                                                "type": "integer"
+                                            },
+                                            "password": {
+                                                "type": "string"
+                                            },
+                                            "password_confirmation": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "name": "John Doe",
+                                    "email": "johndoe@example.com",
+                                    "address": "USA",
+                                    "mobile_phone": "0818512938251",
+                                    "role_id": "1",
+                                    "password": "12345678",
+                                    "password_confirmation": "12345678"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "data created"
+                    },
+                    "400": {
+                        "description": "error"
+                    }
+                }
+            }
+        },
+        "/api/v1/user/login": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Login user",
+                "description": "Endpoint for user login",
+                "operationId": "login",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "email": {
+                                                "type": "email"
+                                            },
+                                            "password": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "email": "johndoe@example.com",
+                                    "password": "12345678"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "success"
+                    },
+                    "400": {
+                        "description": "error"
+                    }
+                }
+            }
+        },
+        "/api/v1/user/profile/{user_id}": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user by id",
+                "description": "Get user by id",
+                "operationId": "profile",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Failed"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "passport": {
+                "type": "apiKey",
+                "description": "Laravel passport apiKey security.",
+                "in": "header",
+                "name": "Authorization",
+                "scheme": "https",
+                "flows": {
+                    "password": {
+                        "authorizationUrl": "http://localhost/oauth/authorize",
+                        "tokenUrl": "http://localhost/oauth/token",
+                        "refreshUrl": "http://localhost/token/refresh",
+                        "scopes": []
+                    }
+                }
+            }
+        }
+    }
+}
