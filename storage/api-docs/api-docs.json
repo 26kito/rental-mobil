@@ -16,13 +16,248 @@
         }
     },
     "paths": {
+        "/api/v1/car": {
+            "get": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Get all data",
+                "operationId": "index",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Failed",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/car/create": {
+            "post": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Insert new car",
+                "operationId": "store",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "brand_car": {
+                                                "type": "string"
+                                            },
+                                            "car_model_year": {
+                                                "type": "integer"
+                                            },
+                                            "color": {
+                                                "type": "string"
+                                            },
+                                            "capacity": {
+                                                "type": "integer"
+                                            },
+                                            "no_plate": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "brand_car": "Toyota",
+                                    "car_model_year": "2016",
+                                    "color": "blue",
+                                    "capacity": "4",
+                                    "no_plate": "AA1F28G"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Failed",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/car/{car_id}": {
+            "get": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Get car by id",
+                "operationId": "show",
+                "parameters": [
+                    {
+                        "name": "car_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Failed",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/car/edit/{car_id}": {
+            "put": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Edit car",
+                "operationId": "updatee",
+                "parameters": [
+                    {
+                        "name": "car_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "brand_car": {
+                                                "type": "string"
+                                            },
+                                            "car_model_year": {
+                                                "type": "integer"
+                                            },
+                                            "color": {
+                                                "type": "string"
+                                            },
+                                            "capacity": {
+                                                "type": "integer"
+                                            },
+                                            "no_plate": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "brand_car": "Toyota",
+                                    "car_model_year": "2016",
+                                    "color": "blue",
+                                    "capacity": "4",
+                                    "no_plate": "AA1F28G"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/car/delete/{car_id}": {
+            "delete": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Delete car",
+                "operationId": "destroy",
+                "parameters": [
+                    {
+                        "name": "car_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
         "/api/v1/user/register": {
             "post": {
                 "tags": [
                     "user"
                 ],
                 "summary": "Register user",
-                "description": "Register user",
                 "operationId": "register",
                 "requestBody": {
                     "content": {
@@ -60,11 +295,11 @@
                                 "example": {
                                     "name": "John Doe",
                                     "email": "johndoe@example.com",
-                                    "address": "USA",
+                                    "address": "Valid address",
                                     "mobile_phone": "0818512938251",
                                     "role_id": "1",
-                                    "password": "12345678",
-                                    "password_confirmation": "12345678"
+                                    "password": "pass",
+                                    "password_confirmation": "pass"
                                 }
                             }
                         }
@@ -86,7 +321,6 @@
                     "user"
                 ],
                 "summary": "Login user",
-                "description": "Endpoint for user login",
                 "operationId": "login",
                 "requestBody": {
                     "content": {
@@ -130,7 +364,6 @@
                     "user"
                 ],
                 "summary": "Get user by id",
-                "description": "Get user by id",
                 "operationId": "profile",
                 "parameters": [
                     {
@@ -144,10 +377,108 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
                     },
                     "404": {
                         "description": "Failed"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/edit/{user_id}": {
+            "put": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Edit user",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "type": "email"
+                                            },
+                                            "address": {
+                                                "type": "string"
+                                            },
+                                            "mobile_phone": {
+                                                "type": "integer"
+                                            },
+                                            "role_id": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "name": "John Doe",
+                                    "email": "johndoe@example.com",
+                                    "address": "USA",
+                                    "mobile_phone": "0818512938251",
+                                    "role_id": "1"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "success"
+                    },
+                    "400": {
+                        "description": "error"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/logout": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Logout user",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "error"
                     }
                 },
                 "security": [
