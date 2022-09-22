@@ -228,7 +228,7 @@ class UserController extends Controller
    *     path="/api/v1/user/edit/{user_id}",
    *     tags={"user"},
    *     summary="Edit user",
-   *     operationId="update",
+   *     operationId="updateUser",
    *     @OA\Parameter(
    *         in="path",
    *         name="user_id",
@@ -283,7 +283,7 @@ class UserController extends Controller
    *     security={ {"passport": {}} }
    * )
    */
-  public function update(Request $request, $id)
+  public function updateUser(Request $request, $id)
   {
     // Check if user id is same from the param and user id = id
     $user = User::where('id', $id)->where('id', Auth::id())->first();

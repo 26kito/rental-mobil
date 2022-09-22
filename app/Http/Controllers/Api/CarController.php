@@ -216,7 +216,7 @@ class CarController extends Controller
      *     path="/api/v1/car/edit/{car_id}",
      *     tags={"car"},
      *     summary="Edit car",
-     *     operationId="update",
+     *     operationId="updateCar",
      *     @OA\Parameter(
      *         in="path",
      *         name="car_id",
@@ -273,7 +273,7 @@ class CarController extends Controller
      *     security={ {"passport": {}} }
      * )
      */
-    public function update(Request $request, $carId)
+    public function updateCar(Request $request, $carId)
     {
         if (Auth::user()->role_id === 2) {
             $car = Car::with('carDescription')->where('id', $carId)->where('owner_id', Auth::id())->find($carId);

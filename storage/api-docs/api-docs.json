@@ -144,7 +144,7 @@
                     "car"
                 ],
                 "summary": "Edit car",
-                "operationId": "updatee",
+                "operationId": "updateCar",
                 "parameters": [
                     {
                         "name": "car_id",
@@ -240,6 +240,72 @@
                     },
                     "400": {
                         "description": "error",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/rent/{car_id}": {
+            "post": {
+                "tags": [
+                    "rent"
+                ],
+                "summary": "Rent a car for user",
+                "operationId": "rentCar",
+                "parameters": [
+                    {
+                        "name": "car_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "rent_date": {
+                                                "type": "string",
+                                                "format": "date"
+                                            },
+                                            "return_date": {
+                                                "type": "string",
+                                                "format": "date"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "rent_date": "DD-MM-YYYY",
+                                    "return_date": "DD-MM-YYYY"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Failed",
                         "content": {
                             "application/json": {}
                         }
@@ -399,7 +465,7 @@
                     "user"
                 ],
                 "summary": "Edit user",
-                "operationId": "update",
+                "operationId": "updateUser",
                 "parameters": [
                     {
                         "name": "user_id",
