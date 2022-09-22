@@ -14,6 +14,24 @@ use Illuminate\Support\Facades\Validator;
 
 class CarController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/v1/car",
+     *     tags={"car"},
+     *     summary="Get all data",
+     *     operationId="index",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\MediaType(mediaType="application/json")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Failed",
+     *         @OA\MediaType(mediaType="application/json")
+     *     ),
+     * )
+     */
     public function index()
     {
         $data = Car::with('carDescription')->get();
@@ -35,6 +53,62 @@ class CarController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/car/create",
+     *     tags={"car"},
+     *     summary="Insert new car",
+     *     operationId="store",
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                      type="object",
+     *                      @OA\Property(
+     *                          property="brand_car",
+     *                          type="string"
+     *                      ),
+     *                      @OA\Property(
+     *                          property="car_model_year",
+     *                          type="integer"
+     *                      ),
+     *                      @OA\Property(
+     *                          property="color",
+     *                          type="string"
+     *                      ),
+     *                      @OA\Property(
+     *                          property="capacity",
+     *                          type="integer"
+     *                      ),
+     *                      @OA\Property(
+     *                          property="no_plate",
+     *                          type="integer"
+     *                      )
+     *                 ),
+     *                 example={
+     *                     "brand_car":"Toyota",
+     *                     "car_model_year":"2016",
+     *                     "color":"blue",
+     *                     "capacity":"4",
+     *                     "no_plate":"AA1F28G"
+     *                }
+     *             )
+     *         )
+     *      ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\MediaType(mediaType="application/json")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Failed",
+     *         @OA\MediaType(mediaType="application/json")
+     *     ),
+     *     security={ {"passport": {}} }
+     * )
+     */
     public function store(Request $request)
     {
         // Check if user is an car_owner
@@ -98,6 +172,30 @@ class CarController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/car/{car_id}",
+     *     tags={"car"},
+     *     summary="Get car by id",
+     *     operationId="show",
+     *     @OA\Parameter(
+     *         in="path",
+     *         name="car_id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\MediaType(mediaType="application/json")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Failed",
+     *         @OA\MediaType(mediaType="application/json")
+     *     )
+     * )
+     */
     public function show($carId)
     {
         $data = Car::with('carDescription')->find($carId);
@@ -113,7 +211,69 @@ class CarController extends Controller
         }
     }
 
-    public function update(Request $request, $carId)
+    /**
+     * @OA\Put(
+     *     path="/api/v1/car/edit/{car_id}",
+     *     tags={"car"},
+     *     summary="Edit car",
+     *     operationId="updateCar",
+     *     @OA\Parameter(
+     *         in="path",
+     *         name="car_id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                      type="object",
+     *                      @OA\Property(
+     *                          property="brand_car",
+     *                          type="string"
+     *                      ),
+     *                      @OA\Property(
+     *                          property="car_model_year",
+     *                          type="integer"
+     *                      ),
+     *                      @OA\Property(
+     *                          property="color",
+     *                          type="string"
+     *                      ),
+     *                      @OA\Property(
+     *                          property="capacity",
+     *                          type="integer"
+     *                      ),
+     *                      @OA\Property(
+     *                          property="no_plate",
+     *                          type="integer"
+     *                      )
+     *                 ),
+     *                 example={
+     *                     "brand_car":"Toyota",
+     *                     "car_model_year":"2016",
+     *                     "color":"blue",
+     *                     "capacity":"4",
+     *                     "no_plate":"AA1F28G"
+     *                }
+     *             )
+     *         )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="success",
+     *          @OA\MediaType(mediaType="application/json")
+     *      ),
+     *      @OA\Response(
+     *          response=400,
+     *          description="error",
+     *          @OA\MediaType(mediaType="application/json")
+     *      ),
+     *     security={ {"passport": {}} }
+     * )
+     */
+    public function updateCar(Request $request, $carId)
     {
         if (Auth::user()->role_id === 2) {
             $car = Car::with('carDescription')->where('id', $carId)->where('owner_id', Auth::id())->find($carId);
@@ -158,6 +318,31 @@ class CarController extends Controller
         }
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/car/delete/{car_id}",
+     *     tags={"car"},
+     *     summary="Delete car",
+     *     operationId="destroy",
+     *     @OA\Parameter(
+     *         in="path",
+     *         name="car_id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="success",
+     *         @OA\MediaType(mediaType="application/json")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="error",
+     *         @OA\MediaType(mediaType="application/json")
+     *     ),
+     *     security={ {"passport": {}} }
+     * )
+     */
     public function destroy($carId)
     {
         if (Auth::user()->role_id === 2) {

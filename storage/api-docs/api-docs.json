@@ -1,0 +1,577 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Rental Mobil API",
+        "description": "Membuat API sederhana untuk rental mobil",
+        "contact": {
+            "email": "surya.aw26@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0",
+        "x-logo": {
+            "url": "https://via.placeholder.com/190x90.png?text=L5-Swagger"
+        }
+    },
+    "paths": {
+        "/api/v1/car": {
+            "get": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Get all data",
+                "operationId": "index",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Failed",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/car/create": {
+            "post": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Insert new car",
+                "operationId": "store",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "brand_car": {
+                                                "type": "string"
+                                            },
+                                            "car_model_year": {
+                                                "type": "integer"
+                                            },
+                                            "color": {
+                                                "type": "string"
+                                            },
+                                            "capacity": {
+                                                "type": "integer"
+                                            },
+                                            "no_plate": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "brand_car": "Toyota",
+                                    "car_model_year": "2016",
+                                    "color": "blue",
+                                    "capacity": "4",
+                                    "no_plate": "AA1F28G"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Failed",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/car/{car_id}": {
+            "get": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Get car by id",
+                "operationId": "show",
+                "parameters": [
+                    {
+                        "name": "car_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Failed",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/car/edit/{car_id}": {
+            "put": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Edit car",
+                "operationId": "updateCar",
+                "parameters": [
+                    {
+                        "name": "car_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "brand_car": {
+                                                "type": "string"
+                                            },
+                                            "car_model_year": {
+                                                "type": "integer"
+                                            },
+                                            "color": {
+                                                "type": "string"
+                                            },
+                                            "capacity": {
+                                                "type": "integer"
+                                            },
+                                            "no_plate": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "brand_car": "Toyota",
+                                    "car_model_year": "2016",
+                                    "color": "blue",
+                                    "capacity": "4",
+                                    "no_plate": "AA1F28G"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/car/delete/{car_id}": {
+            "delete": {
+                "tags": [
+                    "car"
+                ],
+                "summary": "Delete car",
+                "operationId": "destroy",
+                "parameters": [
+                    {
+                        "name": "car_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/rent/{car_id}": {
+            "post": {
+                "tags": [
+                    "rent"
+                ],
+                "summary": "Rent a car for user",
+                "operationId": "rentCar",
+                "parameters": [
+                    {
+                        "name": "car_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "rent_date": {
+                                                "type": "string",
+                                                "format": "date"
+                                            },
+                                            "return_date": {
+                                                "type": "string",
+                                                "format": "date"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "rent_date": "DD-MM-YYYY",
+                                    "return_date": "DD-MM-YYYY"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Failed",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/register": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Register user",
+                "operationId": "register",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "type": "email"
+                                            },
+                                            "address": {
+                                                "type": "string"
+                                            },
+                                            "mobile_phone": {
+                                                "type": "integer"
+                                            },
+                                            "role_id": {
+                                                "type": "integer"
+                                            },
+                                            "password": {
+                                                "type": "string"
+                                            },
+                                            "password_confirmation": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "name": "John Doe",
+                                    "email": "johndoe@example.com",
+                                    "address": "Valid address",
+                                    "mobile_phone": "0818512938251",
+                                    "role_id": "1",
+                                    "password": "pass",
+                                    "password_confirmation": "pass"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "data created"
+                    },
+                    "400": {
+                        "description": "error"
+                    }
+                }
+            }
+        },
+        "/api/v1/user/login": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Login user",
+                "operationId": "login",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "email": {
+                                                "type": "email"
+                                            },
+                                            "password": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "email": "johndoe@example.com",
+                                    "password": "12345678"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "success"
+                    },
+                    "400": {
+                        "description": "error"
+                    }
+                }
+            }
+        },
+        "/api/v1/user/profile/{user_id}": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user by id",
+                "operationId": "profile",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Failed"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/edit/{user_id}": {
+            "put": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Edit user",
+                "operationId": "updateUser",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "": {
+                                        "properties": {
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "type": "email"
+                                            },
+                                            "address": {
+                                                "type": "string"
+                                            },
+                                            "mobile_phone": {
+                                                "type": "integer"
+                                            },
+                                            "role_id": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "name": "John Doe",
+                                    "email": "johndoe@example.com",
+                                    "address": "USA",
+                                    "mobile_phone": "0818512938251",
+                                    "role_id": "1"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "success"
+                    },
+                    "400": {
+                        "description": "error"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/logout": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Logout user",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "error"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "passport": {
+                "type": "apiKey",
+                "description": "Laravel passport apiKey security.",
+                "in": "header",
+                "name": "Authorization",
+                "scheme": "https",
+                "flows": {
+                    "password": {
+                        "authorizationUrl": "http://localhost/oauth/authorize",
+                        "tokenUrl": "http://localhost/oauth/token",
+                        "refreshUrl": "http://localhost/token/refresh",
+                        "scopes": []
+                    }
+                }
+            }
+        }
+    }
+}

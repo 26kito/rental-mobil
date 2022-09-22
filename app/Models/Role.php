@@ -12,9 +12,4 @@ class Role extends Model
   protected $fillable = [
     'role'
   ];
-
-  public function user()
-  {
-    return $this->hasOne(User::class);
-  }
 }

@@ -21,19 +21,19 @@ Route::prefix('v1')->group(function() {
     Route::get('/profile/{user_id}', [UserController::class, 'profile'])->middleware('auth:api');
     Route::post('/register', [UserController::class, 'register']);
     Route::post('/login', [UserController::class, 'login']);
-    Route::put('/edit/{user_id}', [UserController::class, 'update'])->middleware('auth:api');
-    Route::delete('/logout', [UserController::class, 'logout'])->middleware('auth:api');
+    Route::put('/edit/{user_id}', [UserController::class, 'updateUser'])->middleware('auth:api');
+    Route::post('/logout', [UserController::class, 'logout'])->middleware('auth:api');
   });
 
   Route::prefix('car')->group(function() {
     Route::get('/', [CarController::class, 'index']);
     Route::post('/create', [CarController::class, 'store'])->middleware('auth:api');
     Route::get('/{car_id}', [CarController::class, 'show']);
-    Route::put('edit/{car_id}', [CarController::class, 'update'])->middleware('auth:api');
+    Route::put('edit/{car_id}', [CarController::class, 'updateCar'])->middleware('auth:api');
     Route::delete('delete/{car_id}', [CarController::class, 'destroy'])->middleware('auth:api');
   });
 
   Route::prefix('rent')->group(function() {
-    Route::post('/{car_id}', [RentController::class, 'store'])->middleware('auth:api');
+    Route::post('/{car_id}', [RentController::class, 'rentCar'])->middleware('auth:api');
   });
 });
