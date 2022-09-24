@@ -8,6 +8,7 @@
         "php": "^8.0.2",
         "darkaonline/l5-swagger": "^8.3",
         "guzzlehttp/guzzle": "^7.2",
+        "itsgoingd/clockwork": "^5.1",
         "laravel/framework": "^9.2",
         "laravel/passport": "^11.1",
         "laravel/sanctum": "^3.0",

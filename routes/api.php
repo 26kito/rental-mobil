@@ -16,16 +16,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1')->group(function() {
-  Route::prefix('user')->group(function() {
+Route::prefix('v1')->group(function () {
+  Route::prefix('user')->group(function () {
     Route::get('/profile/{user_id}', [UserController::class, 'profile'])->middleware('auth:api');
     Route::post('/register', [UserController::class, 'register']);
     Route::post('/login', [UserController::class, 'login']);
     Route::put('/edit/{user_id}', [UserController::class, 'updateUser'])->middleware('auth:api');
     Route::post('/logout', [UserController::class, 'logout'])->middleware('auth:api');
+    Route::get('/validate', function () {
+      return response()->json([
+        'message' => 'Valid bang token nya'
+      ]);
+    })->middleware('auth:api');
   });
 
-  Route::prefix('car')->group(function() {
+  Route::prefix('car')->group(function () {
     Route::get('/', [CarController::class, 'index']);
     Route::post('/create', [CarController::class, 'store'])->middleware('auth:api');
     Route::get('/{car_id}', [CarController::class, 'show']);
@@ -33,7 +38,7 @@ Route::prefix('v1')->group(function() {
     Route::delete('delete/{car_id}', [CarController::class, 'destroy'])->middleware('auth:api');
   });
 
-  Route::prefix('rent')->group(function() {
+  Route::prefix('rent')->group(function () {
     Route::post('/{car_id}', [RentController::class, 'rentCar'])->middleware('auth:api');
   });
 });
