@@ -78,7 +78,7 @@ class UserController extends Controller
    */
   public function register(Request $request)
   {
-    $validated = Validator::make($request->all(), [
+    $validated = Validator::make($request->only('name', 'email', 'address', 'mobile_phone', 'role_id', 'password'), [
       'name' => 'required|min:4|max:20|regex:/^[\pL\s\-]+$/u',
       'email' => 'required|email|min:8|max:20|unique:users',
       'address' => 'required',
@@ -153,7 +153,7 @@ class UserController extends Controller
    */
   public function login(Request $request)
   {
-    $validated = Validator::make($request->all(), [
+    $validated = Validator::make($request->only('email', 'password'), [
       'email' => 'required|email|exists:users,email',
       'password' => 'required|min:8'
     ]);

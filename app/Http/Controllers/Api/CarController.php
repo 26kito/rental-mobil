@@ -211,6 +211,23 @@ class CarController extends Controller
         }
     }
 
+    public function carOwner($userId)
+    {
+        if ( Auth::user()->role_id === 2 ) {
+            $data = Car::where('owner_id', $userId)->where('owner_id', Auth::id())->get();
+            if ( $data->isNotEmpty() ) {
+                return response()->json([
+                    'message' => 'success',
+                    'data' => $data
+                ], 200);
+            } else {
+                return response()->json(['message' => 'There\'s no data found!'], 404);
+            }
+        } else {
+            return response()->json(['message' => 'Not authorized!'], 401);
+        }
+    }
+
     /**
      * @OA\Put(
      *     path="/api/v1/car/edit/{car_id}",
