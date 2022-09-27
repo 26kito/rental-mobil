@@ -28,10 +28,10 @@ Route::prefix('v1')->group(function() {
   Route::prefix('car')->group(function() {
     Route::get('/', [CarController::class, 'index']);
     Route::post('/create', [CarController::class, 'store'])->middleware('auth:api');
+    Route::get('/user', [CarController::class, 'carOwner'])->middleware('auth:api');
     Route::get('/{car_id}', [CarController::class, 'show']);
-    Route::get('/user/{user_id}', [CarController::class, 'carOwner'])->middleware('auth:api');
-    Route::put('edit/{car_id}', [CarController::class, 'updateCar'])->middleware('auth:api');
-    Route::delete('delete/{car_id}', [CarController::class, 'destroy'])->middleware('auth:api');
+    Route::put('/edit/{car_id}', [CarController::class, 'updateCar'])->middleware('auth:api');
+    Route::delete('/delete/{car_id}', [CarController::class, 'destroy'])->middleware('auth:api');
   });
 
   Route::prefix('rent')->group(function() {

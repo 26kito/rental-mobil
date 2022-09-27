@@ -13,7 +13,15 @@ class Car extends Model
         'brand_car', 'status', 'owner_id'
     ];
 
+    protected $hidden = [
+        'created_at', 'updated_at'
+    ];
+
     public function carDescription() {
         return $this->hasOne(CarDescription::class);
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 }

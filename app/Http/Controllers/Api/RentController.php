@@ -65,7 +65,8 @@ class RentController extends Controller
         $car = Car::where('id', $carId)->first();
         if (Auth::user()->role_id === 1 && Auth::user()->token()->user_id === Auth::id()) {
             try {
-                if ( $car !== null ) {
+                // If there is car and car status is available then move to next process
+                if ( $car !== null && $car->status_id === 1 ) {
                     $validated = Validator::make($request->all(), [
                         'customer_id' => 'exists:users,id',
                         'car_id' => 'exists:cars,id',
@@ -80,6 +81,7 @@ class RentController extends Controller
                             'rent_date' => Carbon::createFromFormat('d-m-Y', $request->rent_date),
                             'return_date' => Carbon::createFromFormat('d-m-Y', $request->return_date)
                         ]);
+                        Car::where('id', $carId)->update(['status_id' => 3]);
                         return response()->json([
                             'message' => 'Success',
                             'data' => $data

@@ -16,11 +16,13 @@ return new class extends Migration
         Schema::create('cars', function (Blueprint $table) {
             $table->id();
             $table->string('brand_car');
-            $table->string('status')->default('available');
+            // $table->string('status')->default('available');
             $table->unsignedBigInteger('owner_id');
+            $table->unsignedBigInteger('status_id')->default(1);
             $table->timestamps();
             
             $table->foreign('owner_id')->references('id')->on('users');
+            $table->foreign('status_id')->references('id')->on('car_statuses');
         });
     }
 

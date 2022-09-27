@@ -34,7 +34,7 @@ class CarController extends Controller
      */
     public function index()
     {
-        $data = Car::with('carDescription')->get();
+        $data = Car::get();
         try {
             if ($data->isNotEmpty()) {
                 return response()->json([
@@ -42,14 +42,10 @@ class CarController extends Controller
                     'data' => $data
                 ], 200);
             } else {
-                return response()->json([
-                    'message' => 'There\'s no data found'
-                ], 200);
+                return response()->json(['message' => 'There\'s no data found'], 404);
             }
         } catch (Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 400);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
@@ -198,23 +194,21 @@ class CarController extends Controller
      */
     public function show($carId)
     {
-        $data = Car::with('carDescription')->find($carId);
+        $data = Car::with('carDescription', 'user')->find($carId);
         if ($data != null) {
             return response()->json([
                 'message' => 'Success',
                 'data' => $data
             ], 200);
         } else {
-            return response()->json([
-                'message' => 'No data found!'
-            ], 200);
+            return response()->json(['message' => 'No data found!'], 404);
         }
     }
 
-    public function carOwner($userId)
+    public function carOwner()
     {
         if ( Auth::user()->role_id === 2 ) {
-            $data = Car::where('owner_id', $userId)->where('owner_id', Auth::id())->get();
+            $data = Car::with('user:id,name,id')->where('owner_id', Auth::id())->get();
             if ( $data->isNotEmpty() ) {
                 return response()->json([
                     'message' => 'success',
@@ -370,9 +364,7 @@ class CarController extends Controller
                     'message' => 'Data deleted successfully!'
                 ], 200);
             } else {
-                return response()->json([
-                    'message' => 'No data found!'
-                ], 404);
+                return response()->json(['message' => 'No data found!'], 404);
             }
         } else {
             return response()->json(['message' => 'Not authorized!'], 401);
