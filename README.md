@@ -28,25 +28,25 @@ Package yang digunakan:
   `POST`
 
 * **Request Body**
-  name `*required`
-  email `*required`
-  mobile_phone `*required`
-  address `*required`
-  role_id `*required`
-  password `*required`
-  password_confirmation `*required`
+  name `*required` <br/>
+  email `*required` <br/>
+  mobile_phone `*required` <br/>
+  address `*required` <br/>
+  role_id `*required` <br/>
+  password `*required` <br/>
+  password_confirmation `*required` <br/>
 
 * **Success Response:**
 
-  * **Code:** 201 Created
+  * **Code:** 201 Created <br/>
     **Content:** `{ "message": "Successfully register" }`
  
 * **Error Response:**
 
-  * **Code:** 400 Bad Request
+  * **Code:** 400 Bad Request <br/>
     **Content:** `{ "message" : {"email": ["The email has already been taken."]} }`
 
   OR
 
-  * **Code:** 400 Bad Request
+  * **Code:** 400 Bad Request <br/>
     **Content:** `{ "message" : {"address": ["The address field is required."]} }`
