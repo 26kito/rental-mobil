@@ -100,7 +100,7 @@ class UserController extends Controller
         ]);
 
         return response()->json([
-          'message' => 'Successfully created data'
+          'message' => 'Successfully register'
         ], 201);
         // If validation error, throw message
       } else {

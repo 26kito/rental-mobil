@@ -66,7 +66,7 @@ class RentController extends Controller
         if (Auth::user()->role_id === 1 && Auth::user()->token()->user_id === Auth::id()) {
             try {
                 // If there is car and car status is available then move to next process
-                if ( $car !== null && $car->status_id === 1 ) {
+                if ($car !== null && $car->status_id === 1) {
                     $validated = Validator::make($request->all(), [
                         'customer_id' => 'exists:users,id',
                         'car_id' => 'exists:cars,id',
@@ -94,9 +94,7 @@ class RentController extends Controller
                     return response()->json(['message' => 'There\'s no data!'], 404);
                 }
             } catch (Exception $e) {
-                return response()->json([
-                    'message' => $e->getMessage()
-                ]);
+                return response()->json(['message' => $e->getMessage()]);
             }
         } else {
             return response()->json(['message' => 'Not authorized!'], 401);

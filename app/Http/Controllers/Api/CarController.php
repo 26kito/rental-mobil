@@ -109,7 +109,7 @@ class CarController extends Controller
     {
         // Check if user is an car_owner
         if (Auth::user()->role_id === 2) {
-            $firstValidated = Validator::make($request->all(), [
+            $firstValidated = Validator::make($request->only('brand_car'), [
                 'brand_car' => 'required'
             ]);
             // If validation is passes, then proceed to next process
@@ -122,7 +122,7 @@ class CarController extends Controller
                     ]);
                     // If car created, then check the car description
                     if ($insert) {
-                        $secondValidated = Validator::make($request->all(), [
+                        $secondValidated = Validator::make($request->only('car_id', 'car_model_year', 'color', 'capacity', 'no_plate'), [
                             'car_id' => 'unique:car_descriptions',
                             'car_model_year' => 'required|integer',
                             'color' => 'alpha',
@@ -207,7 +207,7 @@ class CarController extends Controller
 
     public function carOwner()
     {
-        if ( Auth::user()->role_id === 2 ) {
+        if (Auth::user()->role_id === 2) {
             $data = Car::with('user:id,name,id')->where('owner_id', Auth::id())->get();
             if ( $data->isNotEmpty() ) {
                 return response()->json([
@@ -360,9 +360,7 @@ class CarController extends Controller
             $data = Car::with('carDescription')->where('id', $carId)->where('owner_id', Auth::id())->find($carId);
             if ($data) {
                 $data->delete();
-                return response()->json([
-                    'message' => 'Data deleted successfully!'
-                ], 200);
+                return response()->json(['message' => 'Data deleted successfully!'], 200);
             } else {
                 return response()->json(['message' => 'No data found!'], 404);
             }
@@ -371,3 +369,4 @@ class CarController extends Controller
         }
     }
 }
+ 
