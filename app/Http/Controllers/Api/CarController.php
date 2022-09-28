@@ -34,7 +34,12 @@ class CarController extends Controller
      */
     public function index()
     {
-        $data = Car::get();
+        $data = DB::table('cars')
+                ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
+                ->join('users', 'cars.owner_id', 'users.id')
+                ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
+                ->select('cars.id', 'cars.brand_car', 'users.name', 'cs.status', 'cd.capacity')
+                ->get();
         try {
             if ($data->isNotEmpty()) {
                 return response()->json([
@@ -194,7 +199,12 @@ class CarController extends Controller
      */
     public function show($carId)
     {
-        $data = Car::with('carDescription', 'user')->find($carId);
+        $data = DB::table('cars')
+                ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
+                ->join('users', 'cars.owner_id', 'users.id')
+                ->where('cars.id', $carId)
+                ->select('cars.brand_car', 'cd.car_model_year', 'cd.color', 'cd.capacity', 'cd.no_plate', 'users.name AS car_owner', 'users.mobile_phone', 'users.email', 'users.address')
+                ->first();
         if ($data != null) {
             return response()->json([
                 'message' => 'Success',
@@ -208,7 +218,12 @@ class CarController extends Controller
     public function carOwner()
     {
         if (Auth::user()->role_id === 2) {
-            $data = Car::with('user:id,name,id')->where('owner_id', Auth::id())->get();
+            // $data = Car::with('user:id,name,id')->where('owner_id', Auth::id())->get();
+            $data = DB::table('cars')
+                    ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
+                    ->select('cars.id', 'cars.brand_car', 'cs.status')
+                    ->where('cars.owner_id', Auth::id())
+                    ->get();
             if ( $data->isNotEmpty() ) {
                 return response()->json([
                     'message' => 'success',
