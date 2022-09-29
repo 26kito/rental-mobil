@@ -19,10 +19,12 @@ return new class extends Migration
             $table->unsignedBigInteger('car_id');
             $table->date('rent_date');
             $table->date('return_date');
+            $table->unsignedBigInteger('rent_status')->default(1);
             $table->timestamps();
 
             $table->foreign('customer_id')->references('id')->on('users');
             $table->foreign('car_id')->references('id')->on('cars');
+            $table->foreign('rent_status')->references('id')->on('rent_statuses');
         });
     }
 

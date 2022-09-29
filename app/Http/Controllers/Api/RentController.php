@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\Models\Car;
 use App\Models\Rent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -62,12 +63,12 @@ class RentController extends Controller
      */
     public function rentCar(Request $request, $carId)
     {
-        $car = Car::where('id', $carId)->first();
         if (Auth::user()->role_id === 1 && Auth::user()->token()->user_id === Auth::id()) {
             try {
+                $car = Car::where('id', $carId)->first();
                 // If there is car and car status is available then move to next process
                 if ($car !== null && $car->status_id === 1) {
-                    $validated = Validator::make($request->all(), [
+                    $validated = Validator::make($request->only('rent_date', 'return_date'), [
                         'customer_id' => 'exists:users,id',
                         'car_id' => 'exists:cars,id',
                         'rent_date' => 'required|date_format:d-m-Y|after_or_equal:today',
@@ -81,7 +82,6 @@ class RentController extends Controller
                             'rent_date' => Carbon::createFromFormat('d-m-Y', $request->rent_date),
                             'return_date' => Carbon::createFromFormat('d-m-Y', $request->return_date)
                         ]);
-                        Car::where('id', $carId)->update(['status_id' => 3]);
                         return response()->json([
                             'message' => 'Success',
                             'data' => $data
@@ -98,6 +98,66 @@ class RentController extends Controller
             }
         } else {
             return response()->json(['message' => 'Not authorized!'], 401);
+        }
+    }
+
+    public function owner()
+    {
+        if (Auth::user()->role_id === 2 && Auth::user()->token()->user_id === Auth::id()) {
+            $data = DB::table('rents')
+                ->join('users', 'customer_id', 'users.id')
+                ->join('cars', 'car_id', 'cars.id')
+                ->select('users.id', 'users.name', 'cars.brand_car', 'rents.rent_date', 'rents.return_date')
+                ->where('cars.owner_id', Auth::id())
+                ->where('rent_status', 1)
+                ->get();
+            if ($data->isNotEmpty()) {
+                return response()->json([
+                    'message' => 'success',
+                    'data' => $data
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'there\'s no data!'
+                ], 404);
+            }
+        } else {
+            return response()->json(['message' => 'Not authorized!'], 401);
+        }
+    }
+
+    public function approval(Request $request, $customer_id)
+    {
+        if (Auth::user()->role_id === 2 && Auth::user()->token()->user_id === Auth::id()) {
+            $validated = Validator::make($request->only('status_id'), [
+                'status_id' => 'integer|between:1,2'
+            ]);
+            if ($validated->passes()) {
+                if ($request->status_id == 1) {
+                    $updateRent = Rent::where('customer_id', $customer_id)->update(['rent_status' => 2]);
+                    if ($updateRent) {
+                        DB::table('cars')
+                            ->join('rents', 'car_id', 'cars.id')
+                            ->where('cars.owner_id', Auth::id())
+                            ->where('rents.customer_id', $customer_id)
+                            ->update(['cars.status_id' => 2]);
+                        $data = Rent::where('customer_id', $customer_id)->first();
+                        return response()->json([
+                            'message' => 'success',
+                            'data' => $data
+                        ], 200);
+                    }
+                } else {
+                    Rent::where('customer_id', $customer_id)->update(['rent_status' => 3]);
+                    $data = Rent::where('customer_id', $customer_id)->first();
+                    return response()->json([
+                        'message' => 'success',
+                        'data' => $data
+                    ], 200);
+                }
+            } else {
+                return response()->json(['message' => $validated->errors()], 400);
+            }
         }
     }
 }

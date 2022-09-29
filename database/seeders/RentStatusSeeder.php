@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\CarStatus;
+use App\Models\RentStatus;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class CarStatusSeeder extends Seeder
+class RentStatusSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,7 +15,8 @@ class CarStatusSeeder extends Seeder
      */
     public function run()
     {
-        CarStatus::create(['status' => 'available']);
-        CarStatus::create(['status' => 'not available']);
+        RentStatus::create(['status' => 'pending']);
+        RentStatus::create(['status' => 'accepted']);
+        RentStatus::create(['status' => 'declined']);
     }
 }

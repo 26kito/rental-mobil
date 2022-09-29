@@ -12,4 +12,8 @@ class Rent extends Model
     protected $fillable = [
         'customer_id', 'car_id', 'rent_date', 'return_date'
     ];
+
+    protected $hidden = [
+        'created_at', 'updated_at'
+    ];
 }

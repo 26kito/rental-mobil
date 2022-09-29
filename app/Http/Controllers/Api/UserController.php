@@ -80,7 +80,7 @@ class UserController extends Controller
   {
     $validated = Validator::make($request->only('name', 'email', 'address', 'mobile_phone', 'role_id', 'password', 'password_confirmation'), [
       'name' => 'required|min:4|max:20|regex:/^[\pL\s\-]+$/u',
-      'email' => 'required|email|min:8|max:20|unique:users',
+      'email' => 'required|email|min:8|max:25|unique:users',
       'address' => 'required',
       'mobile_phone' => 'required|min:11|max:15|regex:/^([0-9\s\-\+\(\)]*)$/|unique:users',
       'role_id' => 'required|exists:roles,id',
@@ -92,7 +92,7 @@ class UserController extends Controller
       if ($validated->passes()) {
         User::create([
           'name' => $request->name,
-          'email' => $request->email,
+          'email' => strtolower($request->email),
           'mobile_phone' => $request->mobile_phone,
           'address' => $request->address,
           'role_id' => $request->role_id,
@@ -210,9 +210,9 @@ class UserController extends Controller
    *     security={ {"passport": {}} }
    * )
    */
-  public function profile($user_id)
+  public function profile()
   {
-    $data = User::where('id', Auth::id())->find($user_id);
+    $data = User::where('id', Auth::id())->find(Auth::id());
     if ($data) {
       return response()->json([
         'message' => 'Success',
@@ -286,11 +286,11 @@ class UserController extends Controller
   public function updateUser(Request $request, $id)
   {
     // Check if user id is same from the param and user id = id
-    $user = User::where('id', $id)->where('id', Auth::id())->first();
+    $user = User::where('id', $id)->where('id', Auth::id())->find($id);
     if ($user) {
       try {
         // Validate for the input
-        $validated = Validator::make($request->all(), [
+        $validated = Validator::make($request->only('name', 'email', 'mobile_phone'), [
           'name' => 'max:20',
           'email' => 'email|min:10',
           Rule::unique('users')->ignore($user->email),
@@ -300,7 +300,7 @@ class UserController extends Controller
 
         // If validation passes, then update data
         if ($validated->passes()) {
-          $user->update($request->all());
+          $user->update($request->only('name', 'email', 'mobile_phone'));
           return response()->json([
             'message' => 'User updated successfully!',
             'data' => $user

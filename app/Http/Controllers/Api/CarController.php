@@ -35,11 +35,11 @@ class CarController extends Controller
     public function index()
     {
         $data = DB::table('cars')
-                ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
-                ->join('users', 'cars.owner_id', 'users.id')
-                ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
-                ->select('cars.id', 'cars.brand_car', 'users.name', 'cs.status', 'cd.capacity')
-                ->get();
+            ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
+            ->join('users', 'cars.owner_id', 'users.id')
+            ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
+            ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
+            ->get();
         try {
             if ($data->isNotEmpty()) {
                 return response()->json([
@@ -127,7 +127,7 @@ class CarController extends Controller
                     ]);
                     // If car created, then check the car description
                     if ($insert) {
-                        $secondValidated = Validator::make($request->only('car_id', 'car_model_year', 'color', 'capacity', 'no_plate'), [
+                        $secondValidated = Validator::make($request->only('car_model_year', 'color', 'capacity', 'no_plate'), [
                             'car_id' => 'unique:car_descriptions',
                             'car_model_year' => 'required|integer',
                             'color' => 'alpha',
@@ -200,11 +200,11 @@ class CarController extends Controller
     public function show($carId)
     {
         $data = DB::table('cars')
-                ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
-                ->join('users', 'cars.owner_id', 'users.id')
-                ->where('cars.id', $carId)
-                ->select('cars.brand_car', 'cd.car_model_year', 'cd.color', 'cd.capacity', 'cd.no_plate', 'users.name AS car_owner', 'users.mobile_phone', 'users.email', 'users.address')
-                ->first();
+            ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
+            ->join('users', 'cars.owner_id', 'users.id')
+            ->where('cars.id', $carId)
+            ->select('cars.brand_car', 'cd.car_model_year', 'cd.color', 'cd.capacity', 'cd.no_plate', 'users.name AS car_owner', 'users.mobile_phone', 'users.email', 'users.address')
+            ->first();
         if ($data != null) {
             return response()->json([
                 'message' => 'Success',
@@ -220,11 +220,11 @@ class CarController extends Controller
         if (Auth::user()->role_id === 2) {
             // $data = Car::with('user:id,name,id')->where('owner_id', Auth::id())->get();
             $data = DB::table('cars')
-                    ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
-                    ->select('cars.id', 'cars.brand_car', 'cs.status')
-                    ->where('cars.owner_id', Auth::id())
-                    ->get();
-            if ( $data->isNotEmpty() ) {
+                ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
+                ->select('cars.id', 'cars.brand_car', 'cs.status')
+                ->where('cars.owner_id', Auth::id())
+                ->get();
+            if ($data->isNotEmpty()) {
                 return response()->json([
                     'message' => 'success',
                     'data' => $data
@@ -306,9 +306,7 @@ class CarController extends Controller
             // Check if there is data
             if ($car) {
                 DB::beginTransaction();
-                $insert = $car->update([
-                    'brand_car' => $request->brand_car
-                ]);
+                $insert = $car->update(['brand_car' => $request->brand_car]);
                 if ($insert) {
                     $validated = $request->validate([
                         'car_model_year' => 'integer',
@@ -384,4 +382,3 @@ class CarController extends Controller
         }
     }
 }
- 
