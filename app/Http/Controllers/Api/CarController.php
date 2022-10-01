@@ -39,7 +39,7 @@ class CarController extends Controller
             ->join('users', 'cars.owner_id', 'users.id')
             ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
             ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
-            ->get();
+            ->paginate(10);
         try {
             if ($data->isNotEmpty()) {
                 return response()->json([
@@ -47,7 +47,7 @@ class CarController extends Controller
                     'data' => $data
                 ], 200);
             } else {
-                return response()->json(['message' => 'There\'s no data found'], 404);
+                return response()->json(['message' => 'There\'s no data'], 404);
             }
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
@@ -157,7 +157,7 @@ class CarController extends Controller
                         // If car is failed to create then throw error
                     } else {
                         DB::rollback();
-                        return response()->json(['message' => 'Gagal'], 200);
+                        return response()->json(['message' => 'Gagal'], 400);
                     }
                 } catch (Exception $e) {
                     DB::rollback();
@@ -165,11 +165,11 @@ class CarController extends Controller
                 }
                 // If validation is failed, then throw error
             } else {
-                return response()->json(['message' => $firstValidated->errors()]);
+                return response()->json(['message' => $firstValidated->errors()], 400);
             }
             // If user is not an car owner, 
         } else {
-            return response()->json(['message' => 'Not authorized'], 403);
+            return response()->json(['message' => 'Not authorized'], 401);
         }
     }
 

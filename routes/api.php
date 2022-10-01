@@ -18,20 +18,29 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
   Route::prefix('user')->group(function () {
-    Route::get('/profile', [UserController::class, 'profile'])->middleware('auth:api');
+    // Register user
     Route::post('/register', [UserController::class, 'register']);
+    // Login user
     Route::post('/login', [UserController::class, 'login']);
+    // Profil user
+    Route::get('/profile', [UserController::class, 'profile'])->middleware('auth:api');
+    // Update user
     Route::put('/edit/{user_id}', [UserController::class, 'updateUser'])->middleware('auth:api');
+    // Logout user
     Route::post('/logout', [UserController::class, 'logout'])->middleware('auth:api');
   });
 
   Route::prefix('car')->group(function () {
+    // Lihat semua mobil
     Route::get('/', [CarController::class, 'index']);
-    Route::post('/create', [CarController::class, 'store'])->middleware('auth:api');
-    Route::get('/owner', [CarController::class, 'carOwner'])->middleware('auth:api');
+    // Aksi owner
+    Route::post('/create', [CarController::class, 'store'])->middleware('auth:api', 'is_car_owner');
+    Route::get('/owner', [CarController::class, 'carOwner'])->middleware('auth:api', 'is_car_owner');
+    // Lihat mobil berdasarkan id mobil
     Route::get('/{car_id}', [CarController::class, 'show']);
-    Route::put('/edit/{car_id}', [CarController::class, 'updateCar'])->middleware('auth:api');
-    Route::delete('/delete/{car_id}', [CarController::class, 'destroy'])->middleware('auth:api');
+    // Aksi owner
+    Route::put('/edit/{car_id}', [CarController::class, 'updateCar'])->middleware('auth:api', 'is_car_owner');
+    Route::delete('/delete/{car_id}', [CarController::class, 'destroy'])->middleware('auth:api', 'is_car_owner');
   });
 
   Route::group(['prefix' => 'rent', 'middleware' => 'auth:api'], function () {

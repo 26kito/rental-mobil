@@ -88,7 +88,7 @@ class RentController extends Controller
                         ], 201);
                         // If data is not validated, then throw error
                     } else {
-                        return response()->json(['message' => $validated->errors()], 200);
+                        return response()->json(['message' => $validated->errors()], 400);
                     }
                 } else {
                     return response()->json(['message' => 'There\'s no data!'], 404);
@@ -133,31 +133,37 @@ class RentController extends Controller
                 'status_id' => 'integer|between:1,2'
             ]);
             if ($validated->passes()) {
-                if ($request->status_id == 1) {
-                    $updateRent = Rent::where('customer_id', $customer_id)->update(['rent_status' => 2]);
-                    if ($updateRent) {
-                        DB::table('cars')
-                            ->join('rents', 'car_id', 'cars.id')
-                            ->where('cars.owner_id', Auth::id())
-                            ->where('rents.customer_id', $customer_id)
-                            ->update(['cars.status_id' => 2]);
-                        $data = Rent::where('customer_id', $customer_id)->first();
-                        return response()->json([
-                            'message' => 'success',
-                            'data' => $data
-                        ], 200);
+                $rent = DB::table('rents')
+                    ->join('users', 'customer_id', 'users.id')
+                    ->join('cars', 'car_id', 'cars.id')
+                    ->select('users.id', 'users.name', 'cars.brand_car', 'rents.rent_date', 'rents.return_date')
+                    ->where('rents.customer_id', $customer_id)
+                    ->where('cars.owner_id', Auth::id())
+                    ->where('rent_status', 1)
+                    ->first();
+                if ($rent->rent_status === 1) {
+                    if ($request->status_id == 1) {
+                        $acceptRent = Rent::where('customer_id', $customer_id)->update(['rent_status' => 2]);
+                        if ($acceptRent) {
+                            DB::table('cars')
+                                ->join('rents', 'car_id', 'cars.id')
+                                ->where('cars.owner_id', Auth::id())
+                                ->where('rents.customer_id', $customer_id)
+                                ->update(['cars.status_id' => 2]);
+                            return response()->json(['message' => 'success'], 200);
+                        }
+                    } else {
+                        Rent::where('customer_id', $customer_id)->update(['rent_status' => 3]);
+                        return response()->json(['message' => 'success'], 200);
                     }
                 } else {
-                    Rent::where('customer_id', $customer_id)->update(['rent_status' => 3]);
-                    $data = Rent::where('customer_id', $customer_id)->first();
-                    return response()->json([
-                        'message' => 'success',
-                        'data' => $data
-                    ], 200);
+                    return response()->json(['message' => 'not found'], 404);
                 }
             } else {
                 return response()->json(['message' => $validated->errors()], 400);
             }
+        } else {
+            return response()->json(['message' => 'Not authorized!'], 401);
         }
     }
 }

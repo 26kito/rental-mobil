@@ -91,7 +91,7 @@ class UserController extends Controller
       // If validation success, then create data
       if ($validated->passes()) {
         User::create([
-          'name' => $request->name,
+          'name' => ucwords($request->name),
           'email' => strtolower($request->email),
           'mobile_phone' => $request->mobile_phone,
           'address' => $request->address,
@@ -99,17 +99,13 @@ class UserController extends Controller
           'password' => Hash::make($request->password)
         ]);
 
-        return response()->json([
-          'message' => 'Successfully register'
-        ], 201);
+        return response()->json(['message' => 'Successfully register'], 201);
         // If validation error, throw message
       } else {
         return response()->json(['message' => $validated->errors()], 400);
       }
     } catch (Exception $e) {
-      return response()->json([
-        'message' => $e->getMessage()
-      ], 400);
+      return response()->json(['message' => $e->getMessage()], 400);
     }
   }
 
@@ -173,7 +169,7 @@ class UserController extends Controller
       } else {
         return response()->json([
           'message' => "Email & password does not match"
-        ], 200);
+        ], 400);
       }
       // When the validation is error
     } else {
@@ -306,14 +302,14 @@ class UserController extends Controller
             'data' => $user
           ], 200);
         } else {
-          return response()->json(['message' => $validated->errors()]);
+          return response()->json(['message' => $validated->errors()], 400);
         }
       } catch (Exception $e) {
-        return response()->json(['message' => $e->getMessage()]);
+        return response()->json(['message' => $e->getMessage()], 400);
       }
       // If user is not same, can't update
     } else {
-      return response()->json(['message' => 'There\'s no data!']);
+      return response()->json(['message' => 'There\'s no data!'], 404);
     }
   }
 
@@ -338,6 +334,7 @@ class UserController extends Controller
   public function logout()
   {
     Auth::user()->token()->revoke();
+    Auth::user()->token()->delete();
     return response()->json(['message' => 'User successfully logged out'], 200);
   }
 }
