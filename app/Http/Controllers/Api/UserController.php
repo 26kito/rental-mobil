@@ -215,7 +215,7 @@ class UserController extends Controller
         'data' => $data
       ], 200);
     } else {
-      return response()->json(['message' => 'There\'s no data!'], 404);
+      return response()->json(['message' => 'There\'s There\'s There\'s no data found!!'], 404);
     }
   }
 
@@ -309,7 +309,7 @@ class UserController extends Controller
       }
       // If user is not same, can't update
     } else {
-      return response()->json(['message' => 'There\'s no data!'], 404);
+      return response()->json(['message' => 'There\'s There\'s There\'s no data found!!'], 404);
     }
   }
 

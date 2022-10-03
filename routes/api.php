@@ -38,6 +38,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/owner', [CarController::class, 'carOwner'])->middleware('auth:api', 'is_car_owner');
     // Lihat mobil berdasarkan id mobil
     Route::get('/{car_id}', [CarController::class, 'show']);
+    // Cari mobil berdasarkan nama mobil
+    Route::get('/search/{brand_car}', [CarController::class, 'search']);
     // Aksi owner
     Route::put('/edit/{car_id}', [CarController::class, 'updateCar'])->middleware('auth:api', 'is_car_owner');
     Route::delete('/delete/{car_id}', [CarController::class, 'destroy'])->middleware('auth:api', 'is_car_owner');
