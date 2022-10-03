@@ -78,9 +78,9 @@ class UserController extends Controller
    */
   public function register(Request $request)
   {
-    $validated = Validator::make($request->all(), [
+    $validated = Validator::make($request->only('name', 'email', 'address', 'mobile_phone', 'role_id', 'password', 'password_confirmation'), [
       'name' => 'required|min:4|max:20|regex:/^[\pL\s\-]+$/u',
-      'email' => 'required|email|min:8|max:20|unique:users',
+      'email' => 'required|email|min:8|max:25|unique:users',
       'address' => 'required',
       'mobile_phone' => 'required|min:11|max:15|regex:/^([0-9\s\-\+\(\)]*)$/|unique:users',
       'role_id' => 'required|exists:roles,id',
@@ -91,25 +91,21 @@ class UserController extends Controller
       // If validation success, then create data
       if ($validated->passes()) {
         User::create([
-          'name' => $request->name,
-          'email' => $request->email,
+          'name' => ucwords($request->name),
+          'email' => strtolower($request->email),
           'mobile_phone' => $request->mobile_phone,
           'address' => $request->address,
           'role_id' => $request->role_id,
           'password' => Hash::make($request->password)
         ]);
 
-        return response()->json([
-          'message' => 'Successfully created data'
-        ], 201);
+        return response()->json(['message' => 'Successfully register'], 201);
         // If validation error, throw message
       } else {
         return response()->json(['message' => $validated->errors()], 400);
       }
     } catch (Exception $e) {
-      return response()->json([
-        'message' => $e->getMessage()
-      ], 400);
+      return response()->json(['message' => $e->getMessage()], 400);
     }
   }
 
@@ -153,7 +149,7 @@ class UserController extends Controller
    */
   public function login(Request $request)
   {
-    $validated = Validator::make($request->all(), [
+    $validated = Validator::make($request->only('email', 'password'), [
       'email' => 'required|email|exists:users,email',
       'password' => 'required|min:8'
     ]);
@@ -173,7 +169,7 @@ class UserController extends Controller
       } else {
         return response()->json([
           'message' => "Email & password does not match"
-        ], 200);
+        ], 400);
       }
       // When the validation is error
     } else {
@@ -210,16 +206,16 @@ class UserController extends Controller
    *     security={ {"passport": {}} }
    * )
    */
-  public function profile($user_id)
+  public function profile()
   {
-    $data = User::where('id', Auth::id())->find($user_id);
+    $data = User::where('id', Auth::id())->find(Auth::id());
     if ($data) {
       return response()->json([
         'message' => 'Success',
         'data' => $data
       ], 200);
     } else {
-      return response()->json(['message' => 'There\'s no data!'], 404);
+      return response()->json(['message' => 'There\'s There\'s There\'s no data found!!'], 404);
     }
   }
 
@@ -286,11 +282,11 @@ class UserController extends Controller
   public function updateUser(Request $request, $id)
   {
     // Check if user id is same from the param and user id = id
-    $user = User::where('id', $id)->where('id', Auth::id())->first();
+    $user = User::where('id', $id)->where('id', Auth::id())->find($id);
     if ($user) {
       try {
         // Validate for the input
-        $validated = Validator::make($request->all(), [
+        $validated = Validator::make($request->only('name', 'email', 'mobile_phone'), [
           'name' => 'max:20',
           'email' => 'email|min:10',
           Rule::unique('users')->ignore($user->email),
@@ -300,20 +296,20 @@ class UserController extends Controller
 
         // If validation passes, then update data
         if ($validated->passes()) {
-          $user->update($request->all());
+          $user->update($request->only('name', 'email', 'mobile_phone'));
           return response()->json([
             'message' => 'User updated successfully!',
             'data' => $user
           ], 200);
         } else {
-          return response()->json(['message' => $validated->errors()]);
+          return response()->json(['message' => $validated->errors()], 400);
         }
       } catch (Exception $e) {
-        return response()->json(['message' => $e->getMessage()]);
+        return response()->json(['message' => $e->getMessage()], 400);
       }
       // If user is not same, can't update
     } else {
-      return response()->json(['message' => 'There\'s no data!']);
+      return response()->json(['message' => 'There\'s There\'s There\'s no data found!!'], 404);
     }
   }
 
@@ -338,6 +334,7 @@ class UserController extends Controller
   public function logout()
   {
     Auth::user()->token()->revoke();
+    Auth::user()->token()->delete();
     return response()->json(['message' => 'User successfully logged out'], 200);
   }
 }
