@@ -47,7 +47,7 @@ class CarController extends Controller
                     'data' => $data
                 ], 200);
             } else {
-                return response()->json(['message' => 'There\'s There\'s There\'s no data found!'], 404);
+                return response()->json(['message' => 'There\'s no data found!'], 404);
             }
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
@@ -206,30 +206,34 @@ class CarController extends Controller
                 'data' => $data
             ], 200);
         } else {
-            return response()->json(['message' => 'There\'s There\'s no data found!'], 404);
+            return response()->json(['message' => 'There\'s no data found!'], 404);
         }
     }
 
-    public function search($brand_car)
+    public function search($keyword)
     {
-        $data = DB::table('cars')
-            ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
-            ->join('users', 'cars.owner_id', 'users.id')
-            ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
-            ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
-            ->where('cars.brand_car', 'LIKE', '%' . $brand_car . '%')
-            ->get();
-        try {
-            if ($data->isNotEmpty()) {
-                return response()->json([
-                    'message' => 'Success',
-                    'data' => $data
-                ], 200);
-            } else {
-                return response()->json(['message' => 'There\'s There\'s There\'s no data found!'], 404);
+        if (strlen($keyword) >= 3) {
+            $data = DB::table('cars')
+                ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
+                ->join('users', 'cars.owner_id', 'users.id')
+                ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
+                ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
+                ->where('cars.brand_car', 'LIKE', '%' . $keyword . '%')
+                ->get();
+            try {
+                if ($data->isNotEmpty()) {
+                    return response()->json([
+                        'message' => 'Success',
+                        'data' => $data
+                    ], 200);
+                } else {
+                    return response()->json(['message' => 'There\'s no data found!'], 404);
+                }
+            } catch (Exception $e) {
+                return response()->json(['message' => $e->getMessage()], 400);
             }
-        } catch (Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+        } else {
+            return response()->json(['message' => 'baku hantam kita anj'], 400);
         }
     }
 
@@ -246,7 +250,7 @@ class CarController extends Controller
                 'data' => $data
             ], 200);
         } else {
-            return response()->json(['message' => 'There\'s There\'s There\'s no data found! found!'], 404);
+            return response()->json(['message' => 'There\'s no data found!'], 404);
         }
     }
 
@@ -347,7 +351,7 @@ class CarController extends Controller
                 return response()->json(['message' => 'Gagal'], 200);
             }
         } else {
-            return response()->json(['message' => 'There\'s There\'s There\'s no data found! found!'], 404);
+            return response()->json(['message' => 'There\'s no data found!'], 404);
         }
     }
 
@@ -383,7 +387,7 @@ class CarController extends Controller
             $data->delete();
             return response()->json(['message' => 'Data deleted successfully!'], 200);
         } else {
-            return response()->json(['message' => 'There\'s There\'s no data found!'], 404);
+            return response()->json(['message' => 'There\'s no data found!'], 404);
         }
     }
 }

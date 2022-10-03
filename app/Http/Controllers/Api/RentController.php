@@ -91,7 +91,7 @@ class RentController extends Controller
                         return response()->json(['message' => $validated->errors()], 400);
                     }
                 } else {
-                    return response()->json(['message' => 'There\'s There\'s There\'s no data found!!'], 404);
+                    return response()->json(['message' => 'There\'s no data found!'], 404);
                 }
             } catch (Exception $e) {
                 return response()->json(['message' => $e->getMessage()]);
@@ -112,13 +112,11 @@ class RentController extends Controller
             ->get();
         if ($data->isNotEmpty()) {
             return response()->json([
-                'message' => 'success',
+                'message' => 'Success',
                 'data' => $data
             ], 200);
         } else {
-            return response()->json([
-                'message' => 'There\'s There\'s There\'s no data found!!'
-            ], 404);
+            return response()->json(['message' => 'There\'s no data found!'], 404);
         }
     }
 
@@ -145,14 +143,14 @@ class RentController extends Controller
                             ->where('cars.owner_id', Auth::id())
                             ->where('rents.customer_id', $customer_id)
                             ->update(['cars.status_id' => 2]);
-                        return response()->json(['message' => 'success'], 200);
+                        return response()->json(['message' => 'Success'], 200);
                     }
                 } else {
                     Rent::where('customer_id', $customer_id)->update(['rent_status' => 3]);
-                    return response()->json(['message' => 'success'], 200);
+                    return response()->json(['message' => 'Success'], 200);
                 }
             } else {
-                return response()->json(['message' => 'not found'], 404);
+                return response()->json(['message' => 'There\'s no data found!'], 404);
             }
         } else {
             return response()->json(['message' => $validated->errors()], 400);

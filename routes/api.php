@@ -39,7 +39,7 @@ Route::prefix('v1')->group(function () {
     // Lihat mobil berdasarkan id mobil
     Route::get('/{car_id}', [CarController::class, 'show']);
     // Cari mobil berdasarkan nama mobil
-    Route::get('/search/{brand_car}', [CarController::class, 'search']);
+    Route::get('/search/{keyword}', [CarController::class, 'search']);
     // Aksi owner
     Route::put('/edit/{car_id}', [CarController::class, 'updateCar'])->middleware('auth:api', 'is_car_owner');
     Route::delete('/delete/{car_id}', [CarController::class, 'destroy'])->middleware('auth:api', 'is_car_owner');
@@ -47,9 +47,9 @@ Route::prefix('v1')->group(function () {
 
   Route::group(['prefix' => 'rent', 'middleware' => 'auth:api'], function () {
     // Owner mau cek siapa aja yg pinjem
-    Route::get('/rent-list', [RentController::class, 'owner']);
+    Route::get('/rent-list', [RentController::class, 'owner'])->middleware('is_car_owner');
     // Aksi owner
-    Route::post('/approval-status/customer/{customer_id}', [RentController::class, 'approval']);
+    Route::post('/approval-status/customer/{customer_id}', [RentController::class, 'approval'])->middleware('is_car_owner');
     // Cust mau sewa mobil
     Route::post('/car/{car_id}', [RentController::class, 'rentCar']);
   });
