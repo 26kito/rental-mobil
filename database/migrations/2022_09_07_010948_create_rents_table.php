@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('rents', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('customer_id')->unique();
+            $table->unsignedBigInteger('customer_id');
             $table->unsignedBigInteger('car_id');
             $table->date('rent_date');
             $table->date('return_date');

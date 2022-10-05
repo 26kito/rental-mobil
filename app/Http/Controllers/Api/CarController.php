@@ -39,6 +39,7 @@ class CarController extends Controller
             ->join('users', 'cars.owner_id', 'users.id')
             ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
             ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
+            ->where('cars.status_id', 1)
             ->paginate(10);
         try {
             if ($data->isNotEmpty()) {
@@ -212,6 +213,7 @@ class CarController extends Controller
 
     public function search($keyword)
     {
+        // Check if input is greater than 3 char
         if (strlen($keyword) >= 3) {
             $data = DB::table('cars')
                 ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
@@ -233,7 +235,7 @@ class CarController extends Controller
                 return response()->json(['message' => $e->getMessage()], 400);
             }
         } else {
-            return response()->json(['message' => 'baku hantam kita anj'], 400);
+            return response()->json(['message' => 'Please input 3 or more characters'], 400);
         }
     }
 
