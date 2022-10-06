@@ -167,15 +167,11 @@ class UserController extends Controller
         ], 200);
         // User email and password is no match
       } else {
-        return response()->json([
-          'message' => "Email & password does not match"
-        ], 400);
+        return response()->json(['message' => "Email & password does not match"], 400);
       }
-      // When the validation is error
+      // When the validation is failed then throw error
     } else {
-      return response()->json([
-        'message' => $validated->errors()
-      ], 400);
+      return response()->json(['message' => $validated->errors()], 400);
     }
   }
 

@@ -21,7 +21,7 @@ Route::prefix('v1')->group(function () {
     // Register user
     Route::post('/register', [UserController::class, 'register']);
     // Login user
-    Route::post('/login', [UserController::class, 'login']);
+    Route::post('/login', [UserController::class, 'login'])->middleware('throttle:login');
     // Profil user
     Route::get('/profile', [UserController::class, 'profile'])->middleware('auth:api');
     // Update user

@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\CarDescription;
-use Faker\Provider\FakeCar;
+use Faker\Provider\Fakecar;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

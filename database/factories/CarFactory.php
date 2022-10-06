@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Car;
 use App\Models\User;
-use Faker\Provider\FakeCar;
+use Faker\Provider\Fakecar;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
