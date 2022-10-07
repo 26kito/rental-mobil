@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1')->group(function () {
+Route::group(['prefix' => 'v1', 'middleware' => 'throttle:api'], function () {
   Route::prefix('user')->group(function () {
     // Register user
     Route::post('/register', [UserController::class, 'register']);
