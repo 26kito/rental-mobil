@@ -416,31 +416,27 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "success"
+                        "description": "success",
+                        "content": {
+                            "application/json": {}
+                        }
                     },
                     "400": {
-                        "description": "error"
+                        "description": "error",
+                        "content": {
+                            "application/json": {}
+                        }
                     }
                 }
             }
         },
-        "/api/v1/user/profile/{user_id}": {
+        "/api/v1/user/profile": {
             "get": {
                 "tags": [
                     "user"
                 ],
-                "summary": "Get user by id",
+                "summary": "Get user",
                 "operationId": "profile",
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -449,7 +445,10 @@
                         }
                     },
                     "404": {
-                        "description": "Failed"
+                        "description": "Failed",
+                        "content": {
+                            "application/json": {}
+                        }
                     }
                 },
                 "security": [

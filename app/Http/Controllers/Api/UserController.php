@@ -139,11 +139,13 @@ class UserController extends Controller
    *      ),
    *      @OA\Response(
    *          response=200,
-   *          description="success"
+   *          description="success",
+   *          @OA\MediaType(mediaType="application/json")
    *      ),
    *      @OA\Response(
    *          response=400,
-   *          description="error"
+   *          description="error",
+   *          @OA\MediaType(mediaType="application/json")
    *      ),
    * )
    */
