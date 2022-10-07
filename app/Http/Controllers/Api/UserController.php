@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use Exception;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
+use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
+use App\Models\User;
+use Exception;
 
 class UserController extends Controller
 {
@@ -84,7 +84,7 @@ class UserController extends Controller
       'address' => 'required',
       'mobile_phone' => 'required|min:11|max:15|regex:/^([0-9\s\-\+\(\)]*)$/|unique:users',
       'role_id' => 'required|exists:roles,id',
-      'password' => 'required|min:8|confirmed'
+      'password' => 'required|min:8|regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z]).{8,}$/|confirmed'
     ]);
 
     try {
@@ -167,33 +167,20 @@ class UserController extends Controller
         ], 200);
         // User email and password is no match
       } else {
-        return response()->json([
-          'message' => "Email & password does not match"
-        ], 400);
+        return response()->json(['message' => "Email & password does not match"], 400);
       }
-      // When the validation is error
+      // When the validation is failed then throw error
     } else {
-      return response()->json([
-        'message' => $validated->errors()
-      ], 400);
+      return response()->json(['message' => $validated->errors()], 400);
     }
   }
 
   /**
    * @OA\Get(
-   *     path="/api/v1/user/profile/{user_id}",
+   *     path="/api/v1/user/profile",
    *     tags={"user"},
-   *     summary="Get user by id",
+   *     summary="Get user",
    *     operationId="profile",
-   *     @OA\Parameter(
-   *         @OA\MediaType(
-   *             mediaType="application/json",
-   *         ),
-   *         in="path",
-   *         name="user_id",
-   *         required=true,
-   *         @OA\Schema(type="integer")
-   *     ),
    *     @OA\Response(
    *         response=200,
    *         description="Success",
@@ -201,21 +188,21 @@ class UserController extends Controller
    *     ),
    *     @OA\Response(
    *         response=404,
-   *         description="Failed"
+   *         description="Failed",
+   *         @OA\MediaType(mediaType="application/json")
    *     ),
    *     security={ {"passport": {}} }
    * )
    */
   public function profile()
   {
-    $data = User::where('id', Auth::id())->find(Auth::id());
-    if ($data) {
+    if (Auth::check()) {
       return response()->json([
         'message' => 'Success',
-        'data' => $data
+        'data' => Auth::user()
       ], 200);
     } else {
-      return response()->json(['message' => 'There\'s There\'s There\'s no data found!!'], 404);
+      return response()->json(['message' => 'There\'s no data found!'], 404);
     }
   }
 
@@ -309,7 +296,7 @@ class UserController extends Controller
       }
       // If user is not same, can't update
     } else {
-      return response()->json(['message' => 'There\'s There\'s There\'s no data found!!'], 404);
+      return response()->json(['message' => 'There\'s no data found!'], 404);
     }
   }
 
