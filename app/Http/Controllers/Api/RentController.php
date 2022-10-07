@@ -14,53 +14,6 @@ use Illuminate\Support\Facades\Validator;
 
 class RentController extends Controller
 {
-    /**
-     * @OA\Post(
-     *     path="/api/v1/rent/{car_id}",
-     *     tags={"rent"},
-     *     summary="Rent a car for user",
-     *     operationId="rentCar",
-     *     @OA\Parameter(
-     *         in="path",
-     *         name="car_id",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         @OA\MediaType(
-     *             mediaType="application/json",
-     *             @OA\Schema(
-     *                 @OA\Property(
-     *                      type="object",
-     *                      @OA\Property(
-     *                          property="rent_date",
-     *                          type="date"
-     *                      ),
-     *                      @OA\Property(
-     *                          property="return_date",
-     *                          type="date"
-     *                      )
-     *                 ),
-     *                 example={
-     *                     "rent_date":"DD-MM-YYYY",
-     *                     "return_date":"DD-MM-YYYY"
-     *                }
-     *             )
-     *         )
-     *      ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Success",
-     *         @OA\MediaType(mediaType="application/json")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Failed",
-     *         @OA\MediaType(mediaType="application/json")
-     *     ),
-     *     security={ {"passport": {}} }
-     * )
-     */
     public function rentCar(Request $request, $carId)
     {
         // Check if customer rent is accepted

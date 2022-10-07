@@ -13,69 +13,6 @@ use Exception;
 
 class UserController extends Controller
 {
-  /**
-   * @OA\Post(
-   *     path="/api/v1/user/register",
-   *     tags={"user"},
-   *     summary="Register user",
-   *     operationId="register",
-   *     @OA\RequestBody(
-   *         @OA\MediaType(
-   *             mediaType="application/json",
-   *             @OA\Schema(
-   *                 @OA\Property(
-   *                      type="object",
-   *                      @OA\Property(
-   *                          property="name",
-   *                          type="string"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="email",
-   *                          type="email"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="address",
-   *                          type="string"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="mobile_phone",
-   *                          type="integer"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="role_id",
-   *                          type="integer"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="password",
-   *                          type="string"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="password_confirmation",
-   *                          type="string"
-   *                      )
-   *                 ),
-   *                 example={
-   *                     "name":"John Doe",
-   *                     "email":"johndoe@example.com",
-   *                     "address":"Valid address",
-   *                     "mobile_phone":"0818512938251",
-   *                     "role_id":"1",
-   *                     "password":"pass",
-   *                     "password_confirmation":"pass"
-   *                }
-   *             )
-   *         )
-   *      ),
-   *      @OA\Response(
-   *          response=201,
-   *          description="data created"
-   *      ),
-   *      @OA\Response(
-   *          response=400,
-   *          description="error"
-   *      ),
-   * )
-   */
   public function register(Request $request)
   {
     $validated = Validator::make($request->only('name', 'email', 'address', 'mobile_phone', 'role_id', 'password', 'password_confirmation'), [
@@ -109,44 +46,6 @@ class UserController extends Controller
     }
   }
 
-  /**
-   * @OA\Post(
-   *     path="/api/v1/user/login",
-   *     tags={"user"},
-   *     summary="Login user",
-   *     operationId="login",
-   *     @OA\RequestBody(
-   *         @OA\MediaType(
-   *             mediaType="application/json",
-   *             @OA\Schema(
-   *                 @OA\Property(
-   *                      type="object",
-   *                      @OA\Property(
-   *                          property="email",
-   *                          type="email"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="password",
-   *                          type="string"
-   *                      )
-   *                 ),
-   *                 example={
-   *                     "email":"johndoe@example.com",
-   *                     "password":"12345678"
-   *                }
-   *             )
-   *         )
-   *      ),
-   *      @OA\Response(
-   *          response=200,
-   *          description="success"
-   *      ),
-   *      @OA\Response(
-   *          response=400,
-   *          description="error"
-   *      ),
-   * )
-   */
   public function login(Request $request)
   {
     $validated = Validator::make($request->only('email', 'password'), [
@@ -175,25 +74,6 @@ class UserController extends Controller
     }
   }
 
-  /**
-   * @OA\Get(
-   *     path="/api/v1/user/profile",
-   *     tags={"user"},
-   *     summary="Get user",
-   *     operationId="profile",
-   *     @OA\Response(
-   *         response=200,
-   *         description="Success",
-   *         @OA\MediaType(mediaType="application/json")
-   *     ),
-   *     @OA\Response(
-   *         response=404,
-   *         description="Failed",
-   *         @OA\MediaType(mediaType="application/json")
-   *     ),
-   *     security={ {"passport": {}} }
-   * )
-   */
   public function profile()
   {
     if (Auth::check()) {
@@ -206,66 +86,6 @@ class UserController extends Controller
     }
   }
 
-  /**
-   * @OA\Put(
-   *     path="/api/v1/user/edit/{user_id}",
-   *     tags={"user"},
-   *     summary="Edit user",
-   *     operationId="updateUser",
-   *     @OA\Parameter(
-   *         in="path",
-   *         name="user_id",
-   *         required=true,
-   *         @OA\Schema(type="integer")
-   *     ),
-   *     @OA\RequestBody(
-   *         @OA\MediaType(
-   *             mediaType="application/json",
-   *             @OA\Schema(
-   *                 @OA\Property(
-   *                      type="object",
-   *                      @OA\Property(
-   *                          property="name",
-   *                          type="string"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="email",
-   *                          type="email"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="address",
-   *                          type="string"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="mobile_phone",
-   *                          type="integer"
-   *                      ),
-   *                      @OA\Property(
-   *                          property="role_id",
-   *                          type="integer"
-   *                      )
-   *                 ),
-   *                 example={
-   *                     "name":"John Doe",
-   *                     "email":"johndoe@example.com",
-   *                     "address":"USA",
-   *                     "mobile_phone":"0818512938251",
-   *                     "role_id":"1"
-   *                }
-   *             )
-   *         )
-   *      ),
-   *      @OA\Response(
-   *          response=200,
-   *          description="success"
-   *      ),
-   *      @OA\Response(
-   *          response=400,
-   *          description="error"
-   *      ),
-   *     security={ {"passport": {}} }
-   * )
-   */
   public function updateUser(Request $request, $id)
   {
     // Check if user id is same from the param and user id = id
@@ -300,24 +120,6 @@ class UserController extends Controller
     }
   }
 
-  /**
-   * @OA\Post(
-   *     path="/api/v1/user/logout",
-   *     tags={"user"},
-   *     summary="Logout user",
-   *     operationId="logout",
-   *      @OA\Response(
-   *          response=200,
-   *          description="success",
-   *          @OA\MediaType(mediaType="application/json")
-   *      ),
-   *      @OA\Response(
-   *          response=400,
-   *          description="error"
-   *      ),
-   *     security={ {"passport": {}} }
-   * )
-   */
   public function logout()
   {
     Auth::user()->token()->revoke();
