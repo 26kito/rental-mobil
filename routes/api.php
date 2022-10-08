@@ -51,6 +51,7 @@ Route::group(['prefix' => 'v1', 'middleware' => 'throttle:api'], function () {
     // Aksi owner
     Route::post('/approval-status/customer/{customer_id}', [RentController::class, 'approval'])->middleware('is_car_owner');
     // Cust mau sewa mobil
-    Route::post('/car/{car_id}', [RentController::class, 'rentCar']);
+    Route::post('/car/{car_id}', [RentController::class, 'rentCar'])->middleware('is_customer');
+    Route::get('/my-rent', [RentController::class, 'history'])->middleware('is_customer');
   });
 });

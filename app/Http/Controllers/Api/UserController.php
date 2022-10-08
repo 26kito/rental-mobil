@@ -60,10 +60,10 @@ class UserController extends Controller
       if (Auth::attempt(['email' => $request->email, 'password' => $request->password]) && Hash::check($request->password, $user->password)) {
         $accessToken = $user->createToken('authToken')->accessToken;
         return response()->json([
-          'message' => 'Success',
+          'message' => 'Successfully login! Redirecting to Home Page',
           'data' => $user,
           'access_token' => $accessToken
-        ], 200);
+        ], 301);
         // User email and password is no match
       } else {
         return response()->json(['message' => "Email & password does not match"], 400);
@@ -81,8 +81,6 @@ class UserController extends Controller
         'message' => 'Success',
         'data' => Auth::user()
       ], 200);
-    } else {
-      return response()->json(['message' => 'There\'s no data found!'], 404);
     }
   }
 

@@ -10,19 +10,22 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class CarController extends Controller
 {
     public function index()
     {
-        $data = DB::table('cars')
-            ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
-            ->join('users', 'cars.owner_id', 'users.id')
-            ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
-            ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
-            ->where('cars.status_id', 1)
-            ->paginate(10);
+        $data = Cache::remember('get_all_car', 60, function () {
+            return DB::table('cars')
+                ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
+                ->join('users', 'cars.owner_id', 'users.id')
+                ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
+                ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
+                ->where('cars.status_id', 1)
+                ->paginate(10);
+        });
         try {
             if ($data->isNotEmpty()) {
                 return response()->json([
@@ -97,12 +100,14 @@ class CarController extends Controller
 
     public function show($carId)
     {
-        $data = DB::table('cars')
-            ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
-            ->join('users', 'cars.owner_id', 'users.id')
-            ->where('cars.id', $carId)
-            ->select('cars.brand_car', 'cd.car_model_year', 'cd.color', 'cd.capacity', 'cd.no_plate', 'users.name AS car_owner', 'users.mobile_phone', 'users.email', 'users.address')
-            ->first();
+        $data = Cache::remember('show_car', 60, function () use ($carId) {
+            return DB::table('cars')
+                ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
+                ->join('users', 'cars.owner_id', 'users.id')
+                ->where('cars.id', $carId)
+                ->select('cars.brand_car', 'cd.car_model_year', 'cd.color', 'cd.capacity', 'cd.no_plate', 'users.name AS car_owner', 'users.mobile_phone', 'users.email', 'users.address')
+                ->first();
+        });
         if ($data != null) {
             return response()->json([
                 'message' => 'Success',
@@ -117,13 +122,16 @@ class CarController extends Controller
     {
         // Check if input is greater than 3 char
         if (strlen($keyword) >= 3) {
-            $data = DB::table('cars')
-                ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
-                ->join('users', 'cars.owner_id', 'users.id')
-                ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
-                ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
-                ->where('cars.brand_car', 'LIKE', '%' . $keyword . '%')
-                ->get();
+            $data = Cache::remember("search_car=$keyword", 60, function () use ($keyword) {
+                return DB::table('cars')
+                    ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
+                    ->join('users', 'cars.owner_id', 'users.id')
+                    ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
+                    ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
+                    ->where('cars.brand_car', 'LIKE', '%' . $keyword . '%')
+                    ->get();
+            });
+
             try {
                 if ($data->isNotEmpty()) {
                     return response()->json([
@@ -143,11 +151,13 @@ class CarController extends Controller
 
     public function carOwner()
     {
-        $data = DB::table('cars')
-            ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
-            ->select('cars.id', 'cars.brand_car', 'cs.status')
-            ->where('cars.owner_id', Auth::id())
-            ->get();
+        $data = Cache::remember('car_owner_user=' . Auth::id(), 60, function () {
+            return DB::table('cars')
+                ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
+                ->select('cars.id', 'cars.brand_car', 'cs.status')
+                ->where('cars.owner_id', Auth::id())
+                ->get();
+        });
         if ($data->isNotEmpty()) {
             return response()->json([
                 'message' => 'success',
@@ -199,7 +209,10 @@ class CarController extends Controller
 
     public function destroy($carId)
     {
-        $data = Car::with('carDescription')->where('id', $carId)->where('owner_id', Auth::id())->find($carId);
+        $data = Car::with('carDescription')
+            ->where('id', $carId)
+            ->where('owner_id', Auth::id())
+            ->find($carId);
         if ($data) {
             $data->delete();
             return response()->json(['message' => 'Data deleted successfully!'], 200);
