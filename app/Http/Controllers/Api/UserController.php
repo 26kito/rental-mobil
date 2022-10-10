@@ -10,6 +10,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
+use Illuminate\Queue\Middleware\RateLimited;
+use Illuminate\Support\Facades\RateLimiter;
 
 class UserController extends Controller
 {
@@ -60,17 +62,18 @@ class UserController extends Controller
       if (Auth::attempt(['email' => $request->email, 'password' => $request->password]) && Hash::check($request->password, $user->password)) {
         $accessToken = $user->createToken('authToken')->accessToken;
         return response()->json([
+          'success' => true,
           'message' => 'Successfully login! Redirecting to Home Page',
           'data' => $user,
           'access_token' => $accessToken
         ], 301);
         // User email and password is no match
       } else {
-        return response()->json(['message' => "Email & password does not match"], 400);
+        return response()->json(['success' => false, 'message' => "Email & password does not match"], 400);
       }
       // When the validation is failed then throw error
     } else {
-      return response()->json(['message' => $validated->errors()], 400);
+      return response()->json(['success' => false, 'message' => $validated->errors()], 400);
     }
   }
 
@@ -78,6 +81,7 @@ class UserController extends Controller
   {
     if (Auth::check()) {
       return response()->json([
+        'success' => true,
         'message' => 'Success',
         'data' => Auth::user()
       ], 200);
@@ -103,18 +107,19 @@ class UserController extends Controller
         if ($validated->passes()) {
           $user->update($request->only('name', 'email', 'mobile_phone'));
           return response()->json([
+            'success' => true,
             'message' => 'User updated successfully!',
             'data' => $user
           ], 200);
         } else {
-          return response()->json(['message' => $validated->errors()], 400);
+          return response()->json(['success' => false, 'message' => $validated->errors()], 400);
         }
       } catch (Exception $e) {
-        return response()->json(['message' => $e->getMessage()], 400);
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
       }
       // If user is not same, can't update
     } else {
-      return response()->json(['message' => 'There\'s no data found!'], 404);
+      return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
     }
   }
 
@@ -122,6 +127,6 @@ class UserController extends Controller
   {
     Auth::user()->token()->revoke();
     Auth::user()->token()->delete();
-    return response()->json(['message' => 'User successfully logged out'], 200);
+    return response()->json(['success' => false, 'message' => 'User successfully logged out'], 200);
   }
 }

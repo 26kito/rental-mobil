@@ -54,15 +54,16 @@ class RentController extends Controller
                             ]
                         );
                         return response()->json([
+                            'success' => true,
                             'message' => 'Success',
                             'data' => $data
                         ], 201);
                         // If data is not validated, then throw error
                     } else {
-                        return response()->json(['message' => $validated->errors()], 400);
+                        return response()->json(['success' => false, 'message' => $validated->errors()], 400);
                     }
                 } else {
-                    return response()->json(['message' => 'There\'s no data found!'], 404);
+                    return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
                 }
             }
         } catch (Exception $e) {
@@ -84,11 +85,12 @@ class RentController extends Controller
 
         if ($data->isNotEmpty()) {
             return response()->json([
+                'success' => true,
                 'message' => 'Success',
                 'data' => $data
             ], 200);
         } else {
-            return response()->json(['message' => 'There\'s no data found!'], 404);
+            return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
         }
     }
 
@@ -104,11 +106,12 @@ class RentController extends Controller
 
         if ($data->isNotEmpty()) {
             return response()->json([
+                'success' => true,
                 'message' => 'Success',
                 'data' => $data
             ], 200);
         } else {
-            return response()->json(['message' => 'There\'s no data found!'], 404);
+            return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
         }
     }
 
@@ -141,17 +144,17 @@ class RentController extends Controller
                             ->where('cars.owner_id', Auth::id())
                             ->where('rents.customer_id', $customer_id)
                             ->update(['cars.status_id' => 2]);
-                        return response()->json(['message' => 'Success'], 200);
+                        return response()->json(['success' => true, 'message' => 'Success'], 200);
                     }
                 } else {
                     $base_query->update(['rent_status' => 3]);
-                    return response()->json(['message' => 'Success'], 200);
+                    return response()->json(['success' => true, 'message' => 'Success'], 200);
                 }
             } else {
-                return response()->json(['message' => 'There\'s no data found!'], 404);
+                return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
             }
         } else {
-            return response()->json(['message' => $validated->errors()], 400);
+            return response()->json(['success' => false, 'message' => $validated->errors()], 400);
         }
     }
 }

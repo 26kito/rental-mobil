@@ -36,7 +36,7 @@ class CarFactory extends Factory
 
         return [
             'brand_car' => $this->faker->vehicle,
-            'owner_id' => User::factory()->create()->id,
+            'owner_id' => User::all()->random()->id,
             'status_id' => fake()->numberBetween(1, 2),
         ];
     }

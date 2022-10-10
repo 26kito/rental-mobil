@@ -52,7 +52,10 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by($request->input('email') ?: $request->ip())
                 ->response(function () {
-                    return response()->json(['message' => 'Pulang sana'], 429);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You\'ve tried to login too many times'
+                    ], 429);
                 });
         });
     }

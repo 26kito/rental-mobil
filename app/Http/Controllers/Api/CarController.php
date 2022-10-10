@@ -17,26 +17,28 @@ class CarController extends Controller
 {
     public function index()
     {
-        $data = Cache::remember('get_all_car', 60, function () {
+        $page = request()->get('page', 1);
+        $data = Cache::remember('get_all_car_page=' . $page, 60, function () {
             return DB::table('cars')
                 ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
                 ->join('users', 'cars.owner_id', 'users.id')
                 ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
                 ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
                 ->where('cars.status_id', 1)
-                ->paginate(10);
+                ->simplePaginate(10);
         });
         try {
             if ($data->isNotEmpty()) {
                 return response()->json([
+                    'success' => true,
                     'message' => 'Success',
                     'data' => $data
                 ], 200);
             } else {
-                return response()->json(['message' => 'There\'s no data found!'], 404);
+                return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
             }
         } catch (Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -76,31 +78,32 @@ class CarController extends Controller
                         DB::commit();
                         $data = Car::with('carDescription')->whereRelation('carDescription', 'car_id', $insert->id)->get();
                         return response()->json([
+                            'success' => true,
                             'message' => 'Data created successfully!',
                             'data' => $data
                         ], 201);
                         // If validation is failed, then throw error
                     } else {
-                        return response()->json(['message' => $secondValidated->errors()]);
+                        return response()->json(['success' => false, 'message' => $secondValidated->errors()]);
                     }
                     // If car is failed to create then throw error
                 } else {
                     DB::rollback();
-                    return response()->json(['message' => 'Gagal'], 400);
+                    return response()->json(['success' => false, 'message' => 'Failed to create'], 400);
                 }
             } catch (Exception $e) {
                 DB::rollback();
-                return response()->json(['message' => $e->getMessage()], 400);
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
             }
             // If validation is failed, then throw error
         } else {
-            return response()->json(['message' => $firstValidated->errors()], 400);
+            return response()->json(['success' => false, 'message' => $firstValidated->errors()], 400);
         }
     }
 
     public function show($carId)
     {
-        $data = Cache::remember('show_car', 60, function () use ($carId) {
+        $data = Cache::remember('show_car=' . $carId, 60, function () use ($carId) {
             return DB::table('cars')
                 ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
                 ->join('users', 'cars.owner_id', 'users.id')
@@ -110,11 +113,12 @@ class CarController extends Controller
         });
         if ($data != null) {
             return response()->json([
+                'success' => true,
                 'message' => 'Success',
                 'data' => $data
             ], 200);
         } else {
-            return response()->json(['message' => 'There\'s no data found!'], 404);
+            return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
         }
     }
 
@@ -122,30 +126,29 @@ class CarController extends Controller
     {
         // Check if input is greater than 3 char
         if (strlen($keyword) >= 3) {
-            $data = Cache::remember("search_car=$keyword", 60, function () use ($keyword) {
-                return DB::table('cars')
-                    ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
-                    ->join('users', 'cars.owner_id', 'users.id')
-                    ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
-                    ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
-                    ->where('cars.brand_car', 'LIKE', '%' . $keyword . '%')
-                    ->get();
-            });
+            $data = DB::table('cars')
+                ->join('car_descriptions AS cd', 'cars.id', 'cd.car_id')
+                ->join('users', 'cars.owner_id', 'users.id')
+                ->join('car_statuses AS cs', 'cars.status_id', 'cs.id')
+                ->select('cars.id', 'cars.brand_car', 'users.name AS owner_name', 'cs.status', 'cd.capacity')
+                ->where('cars.brand_car', 'LIKE', '%' . $keyword . '%')
+                ->get();
 
             try {
                 if ($data->isNotEmpty()) {
                     return response()->json([
+                        'success' => true,
                         'message' => 'Success',
                         'data' => $data
                     ], 200);
                 } else {
-                    return response()->json(['message' => 'There\'s no data found!'], 404);
+                    return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
                 }
             } catch (Exception $e) {
-                return response()->json(['message' => $e->getMessage()], 400);
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
             }
         } else {
-            return response()->json(['message' => 'Please input 3 or more characters'], 400);
+            return response()->json(['success' => false, 'message' => 'Please input 3 or more characters'], 400);
         }
     }
 
@@ -158,13 +161,15 @@ class CarController extends Controller
                 ->where('cars.owner_id', Auth::id())
                 ->get();
         });
+
         if ($data->isNotEmpty()) {
             return response()->json([
+                'success' => true,
                 'message' => 'success',
                 'data' => $data
             ], 200);
         } else {
-            return response()->json(['message' => 'There\'s no data found!'], 404);
+            return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
         }
     }
 
@@ -194,16 +199,17 @@ class CarController extends Controller
                     DB::commit();
                     $data = Car::with('carDescription')->where('id', $carId)->where('owner_id', Auth::id())->first();
                     return response()->json([
+                        'success' => true,
                         'message' => 'Data updated successfully!',
                         'data' => $data
                     ], 201);
                 }
             } else {
                 DB::rollback();
-                return response()->json(['message' => 'Gagal'], 200);
+                return response()->json(['success' => false, 'message' => 'Failed to update'], 400);
             }
         } else {
-            return response()->json(['message' => 'There\'s no data found!'], 404);
+            return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
         }
     }
 
@@ -213,11 +219,12 @@ class CarController extends Controller
             ->where('id', $carId)
             ->where('owner_id', Auth::id())
             ->find($carId);
+
         if ($data) {
             $data->delete();
-            return response()->json(['message' => 'Data deleted successfully!'], 200);
+            return response()->json(['success' => false, 'message' => 'Data deleted successfully!'], 200);
         } else {
-            return response()->json(['message' => 'There\'s no data found!'], 404);
+            return response()->json(['success' => false, 'message' => 'There\'s no data found!'], 404);
         }
     }
 }
