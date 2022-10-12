@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Carbon\Carbon;
+use App\Models\Car;
+use App\Observers\CarObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Car::observe(CarObserver::class);
         config(['app.locale' => 'id']);
         Carbon::setLocale('id');
     }
