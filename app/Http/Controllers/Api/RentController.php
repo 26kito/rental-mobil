@@ -90,7 +90,7 @@ class RentController extends Controller
         $data = DB::table("rents")
             ->join("users", "customer_id", "users.id")
             ->join("cars", "car_id", "cars.id")
-            ->select("users.id", "users.name", "cars.brand_car", "rents.rent_date", "rents.return_date")
+            ->select("users.id AS customer_id", "users.name", "cars.id AS car_id", "cars.brand_car", "rents.rent_date", "rents.return_date")
             ->where("cars.owner_id", Auth::id())
             ->where("rent_status", 1)
             ->get();
@@ -104,8 +104,9 @@ class RentController extends Controller
 
     public function approval(Request $request, $customer_id)
     {
-        $validated = Validator::make($request->only("approval_status"), [
-            "approval_status" => "required|boolean"
+        $validated = Validator::make($request->only("approval_status", "car_id"), [
+            "approval_status" => "required|boolean",
+            "car_id" => "required|integer|exists:rents,car_id"
         ]);
 
         if ($validated->passes()) {
@@ -114,21 +115,23 @@ class RentController extends Controller
                 ->join("cars", "car_id", "cars.id")
                 ->select("users.id", "users.name", "cars.brand_car", "rents.rent_date", "rents.return_date", "rents.rent_status")
                 ->where("rents.customer_id", $customer_id)
+                ->where("rents.car_id", $request->car_id)
                 ->where("rents.rent_status", 1)
                 ->where("cars.owner_id", Auth::id())
+                ->where("cars.status_id", 1)
                 ->first();
 
             if ($data !== null) {
                 $base_query = DB::table("rents")
-                    ->join("cars", "car_id", "cars.id")
+                    ->join("cars", "rents.car_id", "cars.id")
                     ->where("cars.owner_id", Auth::id())
-                    ->where("rents.customer_id", $customer_id);
+                    ->where("rents.customer_id", $customer_id)
+                    ->where("rents.car_id", $request->car_id);
                 if ($request->approval_status) {
                     $acceptRent = $base_query->update(["rent_status" => 2]);
                     if ($acceptRent) {
                         DB::table("cars")
                             ->join("rents", "car_id", "cars.id")
-                            ->where("cars.owner_id", Auth::id())
                             ->where("rents.customer_id", $customer_id)
                             ->update(["cars.status_id" => 2]);
                         return $this->successResponse(200, "Success");
