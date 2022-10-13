@@ -6,10 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class User extends Authenticatable
 {
-  use HasApiTokens, HasFactory, Notifiable;
+  use HasApiTokens, HasFactory, Notifiable, HasUuids;
+
+  public static function boot()
+  {
+    parent::boot();
+
+    static::creating(function ($issue) {
+      $issue->id = Str::uuid(36);
+    });
+  }
+
   /**
    * The attributes that are mass assignable.
    *
@@ -37,7 +49,8 @@ class User extends Authenticatable
     'email_verified_at' => 'datetime',
   ];
 
-  public function cars() {
+  public function cars()
+  {
     return $this->hasMany(Car::class);
   }
 }
