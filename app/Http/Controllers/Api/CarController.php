@@ -25,7 +25,7 @@ class CarController extends Controller
                 ->join("car_statuses AS cs", "cars.status_id", "cs.id")
                 ->select("cars.id", "cars.brand_car", "users.name AS owner_name", "cs.status", "cd.capacity")
                 ->where("cars.status_id", 1)
-                ->simplePaginate(10);
+                ->paginate(10);
         });
         try {
             if ($data->isNotEmpty()) {

@@ -46,9 +46,8 @@ Route::group(["prefix" => "v1", "middleware" => "throttle:api"], function () {
   });
 
   Route::group(["prefix" => "rent", "middleware" => "auth:api"], function () {
-    // Owner mau cek siapa aja yg pinjem
-    Route::get("/rent-list", [RentController::class, "owner"])->middleware("is_car_owner");
     // Aksi owner
+    Route::get("/rent-list", [RentController::class, "owner"])->middleware("is_car_owner");
     Route::post("/approval-status/customer/{customer_id}", [RentController::class, "approval"])->middleware("is_car_owner");
     // Cust mau sewa mobil
     Route::post("/car/{car_id}", [RentController::class, "rentCar"])->middleware("is_customer");

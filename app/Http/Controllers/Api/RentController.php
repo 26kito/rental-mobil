@@ -90,7 +90,7 @@ class RentController extends Controller
         $data = DB::table("rents")
             ->join("users", "customer_id", "users.id")
             ->join("cars", "car_id", "cars.id")
-            ->select("users.id AS customer_id", "users.name", "cars.id AS car_id", "cars.brand_car", "rents.rent_date", "rents.return_date")
+            ->select("users.id AS customer_id", "users.name", "rents.car_id AS car_id", "cars.brand_car", "rents.rent_date", "rents.return_date")
             ->where("cars.owner_id", Auth::id())
             ->where("rent_status", 1)
             ->get();
@@ -131,8 +131,9 @@ class RentController extends Controller
                     $acceptRent = $base_query->update(["rent_status" => 2]);
                     if ($acceptRent) {
                         DB::table("cars")
-                            ->join("rents", "car_id", "cars.id")
+                            ->join("rents", "rents.car_id", "cars.id")
                             ->where("rents.customer_id", $customer_id)
+                            ->where("rents.car_id", $request->car_id)
                             ->update(["cars.status_id" => 2]);
                         return $this->successResponse(200, "Success");
                     }
