@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Car;
 use App\Observers\CarObserver;
 use Laravel\Passport\Passport;
+use App\Observers\RentObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Car::observe(CarObserver::class);
+        Rent::observe(RentObserver::class);
         config(['app.locale' => 'id']);
         Carbon::setLocale('id');
     }
